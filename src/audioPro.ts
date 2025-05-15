@@ -406,8 +406,10 @@ export const AudioPro = {
 			resolvedUrl = normalizeFilePath(resolvedUrl);
 		}
 
+		const { debug } = useInternalStore.getState();
+
 		logDebug('AudioPro: ambientPlay()', { url: resolvedUrl, loop });
-		NativeAudioPro.ambientPlay({ url: resolvedUrl, loop });
+		NativeAudioPro.ambientPlay({ url: resolvedUrl, loop, debug });
 	},
 
 	/**
