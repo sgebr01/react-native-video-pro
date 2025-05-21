@@ -1,21 +1,15 @@
 # React Native Audio Pro
 
-Modern, background-capable audio playback for React Native — built for podcasts, audiobooks, live streams, and long-form media. Works out of the box with background playback, lock screen controls, and clean hooks-based state. Under the hood: Android uses Media3 (not old-school ExoPlayer), giving you up-to-date media session support without any of the legacy baggage. iOS uses AVFoundation, Apple's native audio engine for professional-grade media playback. Supports static remote files, live streaming URLs, and local files (for both audio and artwork) across all platforms.
+Modern, background-capable audio playback for React Native — built for podcasts, audiobooks, live streams, and long-form media. Works out of the box with background playback, lock screen controls, and clean hooks-based state. Under the hood: Android uses Media3 (not old-school ExoPlayer), giving you up-to-date media session support without any of the legacy baggage. iOS uses AVFoundation, Apple's native audio engine for professional-grade media playback. Supports static remote files on iOS and Android.
 
 [![npm version](https://img.shields.io/npm/v/react-native-audio-pro?logo=npm&logoColor=white&labelColor=grey&color=blue)](https://www.npmjs.com/package/react-native-audio-pro)
 [![website](https://img.shields.io/badge/website-rnap.dev-grey?logo=google-chrome&logoColor=white&color=blue)](https://rnap.dev)
 [![GitHub](https://img.shields.io/badge/evergrace--co-react--native--audio--pro-grey?logo=github&logoColor=white&labelColor=grey&color=blue)](https://github.com/evergrace-co/react-native-audio-pro)
 
-> ⚠️ **Stability Notice**
->
-> This library has evolved rapidly and is now considered **stable and production-ready** starting from **v9.2**.
->
-> The core architecture and event/state contracts are now locked in, with most edge cases resolved and thorough testing in place.
->
-> If you're upgrading or adopting the library, we recommend using the latest version from **v9.2 onwards**.
-
 ## Table of Contents
 
+- [✅️ Core Features](#-core-features)
+- [🔧 Add-On Features](#-add-on-features)
 - [⚙️ Requirements](#-requirements)
 - [🚀 Installation](#-installation)
 - [📚 API Overview](#api-overview)
@@ -24,7 +18,32 @@ Modern, background-capable audio playback for React Native — built for podcast
 - [🔊 Ambient Audio](#-ambient-audio)
 - [📱 Example App](#-example-app)
 - [🤝 Contributing](#contributing)
-- [🪪 License](#license)
+
+## ✅ Core Features
+
+These are fully supported, maintained features and the foundation of the library:
+
+- 🎵 **HTTPS Audio Playback** — Stream MP3 and other formats over HTTP(S)
+- 📱 **Background Playback** — Works with screen locked or app backgrounded
+- 🔒 **Lock Screen Controls** — Media control support on Android and iOS
+- 🖼 **Artwork Support** — Display album art on lock screen and media controls (JPEG, PNG, etc.)
+- 🪟 **Notification Center Integration** — Android media session support
+- ⚙️ **Imperative API** — Functions like `play`, `pause`, `resume`, `stop`, etc.
+- 🧭 **Progress Tracking** — Emits position/duration updates at configurable intervals
+- 🔊 **Volume Control** — Real-time control of audio volume
+- 🕘 **Start Time Support** — Begin playback from a specific position
+- 🪪 **HTTP Headers** — Pass custom headers for audio and artwork URLs
+- 💡 **Native Foundations** — Powered by Media3 (Android) and AVFoundation (iOS)
+- 🧩 **Fully Typed API** — First-class TypeScript support
+
+## 🔧 Add-On Features
+
+React Native Audio Pro also includes a few optional capabilities that support more advanced or specialized use cases. These are included in the library but may not receive the same level of maintenance priority as the core feature set.
+
+- 🎚 **Ambient Audio API** — A simple secondary player for background or layered audio playback
+- 🔁 **Live Streams** — Many live stream URLs are supported, though not officially tested or guaranteed
+- 📂 **Local Files via File Path** — Supports full `file://` paths (e.g. using `react-native-fs`)
+- 🚦 **Autoplay + Timers** — Supports `autoPlay` and `startTimeMs`. For stop-at logic, use progress events in your app
 
 ## ⚙️ Requirements
 
@@ -75,8 +94,6 @@ buildscript {
 }
 ```
 
-
-
 ## 📚 API Overview
 
 React Native Audio Pro supports various audio formats including MP3, AAC, WAV, and streaming protocols like HLS, DASH, RTSP, and RTMP.
@@ -103,21 +120,7 @@ React Native Audio Pro supports various audio formats including MP3, AAC, WAV, a
 | **getPlaybackSpeed()**                                        | Returns the current playback speed rate.                                                   | `number`                                 |
 | **setVolume(volume: number)**                                 | Sets the playback volume from (0.0 to 1.0). Does not affect the system volume.             | `void`                                   |
 | **getVolume()**                                               | Returns the current relative volume (0.0 to 1.0).                                          | `number`                                 |
-| **getError()**                                                | Returns the last error that occurred, or null if no error has occurred.                    | `AudioProPlaybackErrorPayload \| null`   |
-
-### 🎵 Ambient Audio Methods (Stateless Fire-and-Forget)
-
-> 🧠 Ambient playback is designed to be stateless, simple, and minimal for background sounds, ambient loops, or lightweight audio tasks.
-
-| Method                                                         | Description                                                                                                                                           | Return Value          |
-|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| **ambientPlay(options: AmbientAudioPlayOptions)**              | Plays a lightweight ambient audio track, isolated from the main player. Accepts a remote or local `url` and optional `loop` flag (default: `true`).   | `void`                |
-| **ambientStop()**                                              | Stops the ambient audio playback.                                                                                                                     | `void`                |
-| **ambientPause()**                                             | Pause ambient audio playback (no-op if already paused or not playing).                                                                                | `void`                |
-| **ambientResume()**                                            | Resume ambient audio playback if paused (no-op if already playing or no active track).                                                                | `void`                |
-| **ambientSeekTo(positionMs: number)**                          | Seek to the specified position (in milliseconds) in the ambient track (if supported). Silently ignore if not supported or if no active ambient track. | `void`                |
-| **ambientSetVolume(volume: number)**                           | Sets the volume of ambient audio playback from 0.0 (mute) to 1.0 (full output).                                                                       | `void`                |
-| **addAmbientListener(callback: AudioProAmbientEventCallback)** | Listens for ambient audio events (e.g., track ended, errors).                                                                                         | `EmitterSubscription` |
+| **getError()**                                                | Returns the last error that occurred, or null if no error has occurred.                    | `AudioProPlaybackErrorPayload \| null`   |                                                                                   | `EmitterSubscription` |
 
 ### ⚡️ React Hook
 
@@ -183,7 +186,7 @@ const { state, position, duration, playingTrack, playbackSpeed, volume, error } 
 | `MUSIC`  | Optimized for music playback. Use for songs or music-heavy audio content. This is the default. |
 | `SPEECH` | Optimized for spoken word content. Use for podcasts, audiobooks, or speech-heavy content.      |
 
-### Lock Screen Controls
+### 🔔 Lock Screen Controls
 
 Both iOS and Android support lock screen and notification controls for play/pause, seek, and track navigation (next/previous).
 
@@ -195,6 +198,20 @@ AudioPro.configure({
   showNextPrevControls: false, // Hide next/previous buttons on lock screen
 });
 ```
+
+### 🎵 Ambient Audio Methods (Stateless Fire-and-Forget)
+
+> 🧠 Ambient playback is designed to be stateless, simple, and minimal for background sounds, ambient loops, or lightweight audio tasks.
+
+| Method                                                         | Description                                                                                                                                           | Return Value          |
+|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
+| **ambientPlay(options: AmbientAudioPlayOptions)**              | Plays a lightweight ambient audio track, isolated from the main player. Accepts a remote or local `url` and optional `loop` flag (default: `true`).   | `void`                |
+| **ambientStop()**                                              | Stops the ambient audio playback.                                                                                                                     | `void`                |
+| **ambientPause()**                                             | Pause ambient audio playback (no-op if already paused or not playing).                                                                                | `void`                |
+| **ambientResume()**                                            | Resume ambient audio playback if paused (no-op if already playing or no active track).                                                                | `void`                |
+| **ambientSeekTo(positionMs: number)**                          | Seek to the specified position (in milliseconds) in the ambient track (if supported). Silently ignore if not supported or if no active ambient track. | `void`                |
+| **ambientSetVolume(volume: number)**                           | Sets the volume of ambient audio playback from 0.0 (mute) to 1.0 (full output).                                                                       | `void`                |
+| **addAmbientListener(callback: AudioProAmbientEventCallback)** | Listens for ambient audio events (e.g., track ended, errors).
 
 ### 🧩 Types
 
@@ -390,7 +407,7 @@ AudioPro.configure({
   debug: __DEV__,
 });
 
-// Define an audio track (supports static remote files, live streams, and local files)
+// Define an audio track (supports static remote files, live streams, and file:// URLs)
 const track = {
   id: 'track-001',
   url: 'https://example.com/audio.mp3', // Remote file, live stream URL, or file:// URL
@@ -547,9 +564,6 @@ function determineNextTrack() { /* Your logic here */ }
 
 ## 📱 Example App
 
-<details>
-<summary><b>Running the Example App</b></summary>
-
 A complete working example for iOS and Android is provided in the [`example/`](./example) folder.
 
 It demonstrates how to use `react-native-audio-pro` in a real React Native app, including:
@@ -576,7 +590,6 @@ yarn example android
 ```
 
 **OR** open the `./example/ios` folder in XCode, or the `./example/android` folder in Android Studio and run the app on a simulator or physical device.
-</details>
 
 ---
 
