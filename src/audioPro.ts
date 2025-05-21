@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
 import { ambientEmitter, emitter } from './emitter';
 import { useInternalStore } from './useInternalStore';
@@ -27,8 +27,7 @@ import type {
 	AudioProTrack,
 } from './types';
 
-const NativeAudioPro =
-	Platform.OS === 'web' ? require('./web').WebAudioPro : NativeModules.AudioPro;
+const NativeAudioPro = NativeModules.AudioPro;
 
 /**
  * Checks if the current player state is valid for the given operation
