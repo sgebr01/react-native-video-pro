@@ -220,6 +220,7 @@ object AudioProController {
 	}
 
 	fun pause() {
+		log("pause() called")
 		ensureSession()
 		runOnUiThread {
 			enginerBrowser?.pause()
@@ -232,6 +233,7 @@ object AudioProController {
 	}
 
 	fun resume() {
+		log("resume() called")
 		ensureSession()
 		runOnUiThread {
 			enginerBrowser?.play()
@@ -244,6 +246,7 @@ object AudioProController {
 	}
 
 	fun stop() {
+		log("stop() called")
 		// Reset error state when explicitly stopping
 		flowIsInErrorState = false
 		// Reset last emitted state when stopping playback
@@ -427,6 +430,8 @@ object AudioProController {
 		enginePlayerListener = object : Player.Listener {
 
 			override fun onIsPlayingChanged(isPlaying: Boolean) {
+				log("onIsPlayingChanged", "isPlaying=", isPlaying)
+				log("onIsPlayingChanged -> currentPosition=", enginerBrowser?.currentPosition, "duration=", enginerBrowser?.duration)
 				val pos = enginerBrowser?.currentPosition ?: 0L
 				val dur = enginerBrowser?.duration ?: 0L
 
@@ -440,6 +445,7 @@ object AudioProController {
 			}
 
 			override fun onPlaybackStateChanged(state: Int) {
+				log("onPlaybackStateChanged", "state=", state, "playWhenReady=", enginerBrowser?.playWhenReady, "isPlaying=", enginerBrowser?.isPlaying)
 				val pos = enginerBrowser?.currentPosition ?: 0L
 				val dur = enginerBrowser?.duration ?: 0L
 				val isPlayIntended = enginerBrowser?.playWhenReady == true
@@ -626,6 +632,9 @@ object AudioProController {
 	}
 
 	private fun emitState(state: String, position: Long, duration: Long) {
+		val sanitizedPosition = if (position < 0) 0L else position
+		val sanitizedDuration = if (duration < 0) 0L else duration
+		log("emitState", state, "position=", sanitizedPosition, "duration=", sanitizedDuration)
 		// Don't emit PAUSED if we've already emitted STOPPED (catch slow listener emit)
 		if (state == AudioProModule.STATE_PAUSED && flowLastEmittedState == AudioProModule.STATE_STOPPED) {
 			log("Ignoring PAUSED state after STOPPED")
@@ -644,10 +653,6 @@ object AudioProController {
 			log("Ignoring duplicate $state state emission")
 			return
 		}
-
-		// Sanitize negative values
-		val sanitizedPosition = if (position < 0) 0L else position
-		val sanitizedDuration = if (duration < 0) 0L else duration
 
 		val payload = Arguments.createMap().apply {
 			putString("state", state)

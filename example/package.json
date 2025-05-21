@@ -11,7 +11,8 @@
 		"build:android": "react-native build-android --mode debug --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
 		"build:android:release": "react-native build-android --mode release --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
 		"build:ios": "react-native build-ios --scheme AudioProExample --mode Debug --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\"",
-		"build:ios:release": "react-native build-ios --scheme AudioProExample --mode Release --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\""
+		"build:ios:release": "react-native build-ios --scheme AudioProExample --mode Release --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\"",
+		"debug:android": "cd android/ && ./gradlew clean && cd ../ && yarn android:release"
 	},
 	"dependencies": {
 		"@react-native-community/slider": "^4.5.6",
