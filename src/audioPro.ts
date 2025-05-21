@@ -5,9 +5,9 @@ import { useInternalStore } from './useInternalStore';
 import {
 	guardTrackPlaying,
 	logDebug,
-	normalizeFilePath,
 	normalizeVolume,
 	validateTrack,
+	validateFilePath,
 } from './utils';
 import {
 	AudioProAmbientEventType,
@@ -80,12 +80,12 @@ export const AudioPro = {
 	play(track: AudioProTrack, options: AudioProPlayOptions = {}) {
 		const resolvedTrack = { ...track };
 
-		// Normalize file paths to ensure local paths have file:// prefix
-		resolvedTrack.url = normalizeFilePath(resolvedTrack.url);
-		resolvedTrack.artwork = normalizeFilePath(resolvedTrack.artwork);
+		// Validate URL schemes for track and artwork
+		validateFilePath(resolvedTrack.url);
+		validateFilePath(resolvedTrack.artwork);
 
 		if (!validateTrack(resolvedTrack)) {
-			const errorMessage = 'AudioPro: Invalid track provided to play().';
+			const errorMessage = '[react-native-audio-pro]: Invalid track provided to play().';
 			console.error(errorMessage);
 			emitter.emit('AudioProEvent', {
 				type: AudioProEventType.PLAYBACK_ERROR,
@@ -265,7 +265,7 @@ export const AudioPro = {
 		const validatedSpeed = Math.max(0.25, Math.min(2.0, speed));
 		if (validatedSpeed !== speed) {
 			console.warn(
-				`AudioPro: Playback speed ${speed} out of range, clamped to ${validatedSpeed}`,
+				`[react-native-audio-pro]: Playback speed ${speed} out of range, clamped to ${validatedSpeed}`,
 			);
 		}
 
@@ -296,7 +296,9 @@ export const AudioPro = {
 	setVolume(volume: number) {
 		const clampedVolume = Math.max(0, Math.min(1, volume));
 		if (clampedVolume !== volume) {
-			console.warn(`AudioPro: Volume ${volume} out of range, clamped to ${clampedVolume}`);
+			console.warn(
+				`[react-native-audio-pro]: Volume ${volume} out of range, clamped to ${clampedVolume}`,
+			);
 		}
 
 		const normalizedVolume = normalizeVolume(clampedVolume);
@@ -341,7 +343,7 @@ export const AudioPro = {
 		const clampedMs = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, ms));
 		if (clampedMs !== ms) {
 			console.warn(
-				`AudioPro: Progress interval ${ms}ms out of range, clamped to ${clampedMs}ms`,
+				`[react-native-audio-pro]: Progress interval ${ms}ms out of range, clamped to ${clampedMs}ms`,
 			);
 		}
 
@@ -377,7 +379,7 @@ export const AudioPro = {
 		const { url: originalUrl, loop = true } = options;
 
 		if (!originalUrl) {
-			const errorMessage = 'AudioPro: Invalid URL provided to ambientPlay().';
+			const errorMessage = '[react-native-audio-pro]: Invalid URL provided to ambientPlay().';
 			console.error(errorMessage);
 			ambientEmitter.emit('AudioProAmbientEvent', {
 				type: AudioProAmbientEventType.AMBIENT_ERROR,
@@ -387,9 +389,9 @@ export const AudioPro = {
 			});
 			return;
 		}
-
-		// Normalize file path to ensure local paths have file:// prefix
-		const resolvedUrl = normalizeFilePath(originalUrl);
+		// Validate URL scheme for ambient track
+		validateFilePath(originalUrl);
+		const resolvedUrl = originalUrl;
 
 		const { debug } = useInternalStore.getState();
 
@@ -413,7 +415,9 @@ export const AudioPro = {
 	ambientSetVolume(volume: number): void {
 		const clampedVolume = Math.max(0, Math.min(1, volume));
 		if (clampedVolume !== volume) {
-			console.warn(`AudioPro: Volume ${volume} out of range, clamped to ${clampedVolume}`);
+			console.warn(
+				`[react-native-audio-pro]: Volume ${volume} out of range, clamped to ${clampedVolume}`,
+			);
 		}
 
 		const normalizedVolume = normalizeVolume(clampedVolume);

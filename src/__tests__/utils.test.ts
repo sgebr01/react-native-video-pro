@@ -2,12 +2,12 @@
 import { emitter } from '../emitter';
 import { useInternalStore } from '../useInternalStore';
 import {
-	normalizeFilePath,
 	isValidUrl,
 	validateTrack,
 	guardTrackPlaying,
 	logDebug,
 	normalizeVolume,
+	validateFilePath,
 } from '../utils';
 import { AudioProEventType } from '../values';
 
@@ -56,30 +56,13 @@ jest.mock('../emitter', () => ({
 	emitter: { emit: jest.fn() },
 }));
 
-describe('normalizeFilePath', () => {
-	beforeEach(() => {
-		// Spy on console.warn to prevent actual warnings in tests
-		jest.spyOn(console, 'warn').mockImplementation(() => {});
-	});
-
-	it('prefixes local paths with file://', () => {
-		expect(normalizeFilePath('/foo/bar')).toBe('file:///foo/bar');
-	});
-	it('does not modify file:// paths', () => {
-		expect(normalizeFilePath('file:///foo/bar')).toBe('file:///foo/bar');
-	});
-	it('does not modify http:// URLs', () => {
-		expect(normalizeFilePath('http://example.com')).toBe('http://example.com');
-	});
-});
-
 describe('isValidUrl', () => {
 	beforeEach(() => {
 		// Reset mockState for each test
 		mockState.debug = false;
 		// Update the useInternalStore.getState mock
-
 		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
+		jest.spyOn(console, 'warn').mockImplementation(() => {});
 	});
 	it('returns false for empty or whitespace strings', () => {
 		expect(isValidUrl('')).toBe(false);
@@ -89,6 +72,27 @@ describe('isValidUrl', () => {
 		['http://', 'https://', 'file://', 'data:', 'blob:'].forEach((scheme) => {
 			expect(isValidUrl(`${scheme}resource`)).toBe(true);
 		});
+	});
+});
+
+describe('validateFilePath', () => {
+	beforeEach(() => {
+		jest.spyOn(console, 'error').mockImplementation(() => {});
+	});
+
+	it('does not error for supported schemes', () => {
+		validateFilePath('http://example.com/audio.mp3');
+		validateFilePath('https://example.com/audio.mp3');
+		validateFilePath('file:///path/to/audio.mp3');
+		expect(console.error).not.toHaveBeenCalled();
+	});
+
+	it('logs error for unsupported schemes', () => {
+		const invalidPath = 'ftp://example.com/audio.mp3';
+		validateFilePath(invalidPath);
+		expect(console.error).toHaveBeenCalledWith(
+			`[react-native-audio-pro] Invalid file path detected: ftp://example.com/audio.mp3. Only http://, https://, and file:// schemes are recognized.`,
+		);
 	});
 });
 
@@ -180,7 +184,7 @@ describe('logDebug', () => {
 	it('logs when debug true', () => {
 		mockState.debug = true;
 		logDebug('hello', 1);
-		expect(console.log).toHaveBeenCalledWith('~~~', 'hello', 1);
+		expect(console.log).toHaveBeenCalledWith('[react-native-audio-pro]', 'hello', 1);
 	});
 	it('does not log when debug false', () => {
 		mockState.debug = false;

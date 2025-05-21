@@ -64,7 +64,7 @@ export const useInternalStore = create<AudioProStore>((set, get) => ({
 
 		// Warn if a non-error event has no track
 		if (track === undefined && type !== AudioProEventType.PLAYBACK_ERROR) {
-			console.warn(`AudioPro: Event ${type} missing required track property`);
+			console.warn(`[react-native-audio-pro]: Event ${type} missing required track property`);
 		}
 
 		// 1. State changes

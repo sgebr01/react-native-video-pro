@@ -54,7 +54,7 @@ object AudioProController {
 			if (!settingDebugIncludesProgress && args.isNotEmpty() && args[0] == AudioProModule.EVENT_TYPE_PROGRESS) {
 				return
 			}
-			Log.d("AudioPro", "~~~ ${args.joinToString(" ")}")
+			Log.d("[react-native-audio-pro]", "${args.joinToString(" ")}")
 		}
 	}
 
@@ -215,7 +215,7 @@ object AudioProController {
 				} else {
 					emitState(AudioProModule.STATE_PAUSED, 0L, 0L)
 				}
-			} ?: Log.w("AudioProController", "MediaBrowser not ready")
+			} ?: Log.w("[react-native-audio-pro]", "MediaBrowser not ready")
 		}
 	}
 
@@ -359,7 +359,7 @@ object AudioProController {
 						context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 					notificationManager.cancel(789) // Using the same NOTIFICATION_ID as in AudioProPlaybackService
 				} catch (e: Exception) {
-					Log.e("AudioProController", "Error canceling notification", e)
+					Log.e("[react-native-audio-pro]", "Error canceling notification", e)
 				}
 
 				// Stop the service
@@ -367,7 +367,7 @@ object AudioProController {
 				context.stopService(intent)
 			}
 		} catch (e: Exception) {
-			Log.e("AudioProController", "Error stopping service", e)
+			Log.e("[react-native-audio-pro]", "Error stopping service", e)
 		}
 	}
 
@@ -627,7 +627,7 @@ object AudioProController {
 				.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
 				.emit(AudioProModule.EVENT_NAME, body)
 		} else {
-			Log.w("AudioProController", "Context is not an instance of ReactApplicationContext")
+			Log.w("[react-native-audio-pro]", "Context is not an instance of ReactApplicationContext")
 		}
 	}
 

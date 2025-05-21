@@ -20,7 +20,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
  * share any state, events, or resources with it.
  */
 object AudioProAmbientController {
-	private const val TAG = "AudioPro-Ambient"
+	private const val TAG = "[react-native-audio-pro]"
 	private const val AMBIENT_EVENT_NAME = "AudioProAmbientEvent"
 	private const val EVENT_TYPE_AMBIENT_TRACK_ENDED = "AMBIENT_TRACK_ENDED"
 	private const val EVENT_TYPE_AMBIENT_ERROR = "AMBIENT_ERROR"
@@ -44,7 +44,7 @@ object AudioProAmbientController {
 	 */
 	private fun log(vararg args: Any?) {
 		if (settingDebugAmbient) {
-			Log.d(TAG, "~~~ ${args.joinToString(" ")}")
+			Log.d(TAG, "${args.joinToString(" ")}")
 		}
 	}
 

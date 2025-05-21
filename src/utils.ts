@@ -5,29 +5,19 @@ import { AudioProEventType } from './values';
 import type { AudioProTrack } from './types';
 
 /**
- * Normalizes a file path to ensure it has the file:// prefix if it's a local path
+ * Validates a file path or URL scheme.
+ * Logs an error if the path does not begin with http://, https://, or file://.
  *
- * @param path - The path to normalize
- * @returns The normalized path with file:// prefix if needed
+ * @param path - The path or URL to validate.
  */
-export function normalizeFilePath(path: string): string {
-	// noinspection SuspiciousTypeOfGuard
-	if (
-		typeof path === 'string' &&
-		path.startsWith('/') &&
-		!path.startsWith('file://') &&
-		!path.startsWith('http://') &&
-		!path.startsWith('https://')
-	) {
-		if (__DEV__) {
-			console.warn(
-				'[react-native-audio-pro] Deprecation Notice: Local file paths must be prefixed with "file://". ' +
-					'Auto-correction is deprecated and will be removed in v10.0.0. Please update your code.',
-			);
-		}
-		return `file://${path}`;
+export function validateFilePath(path: string) {
+	const supportedSchemes = ['http://', 'https://', 'file://'];
+	if (!supportedSchemes.some((scheme) => path && path.startsWith(scheme))) {
+		console.error(
+			`[react-native-audio-pro] Invalid file path detected: ${path}. ` +
+				`Only http://, https://, and file:// schemes are recognized.`,
+		);
 	}
-	return path;
 }
 
 /**
@@ -135,7 +125,7 @@ export function validateTrack(track: AudioProTrack): boolean {
  */
 export function guardTrackPlaying(methodName: string): boolean {
 	if (!useInternalStore.getState().trackPlaying) {
-		const errorMessage = `~~~ AudioPro: ${methodName} called but no track is playing or has been played.`;
+		const errorMessage = `[react-native-audio-pro]: ${methodName} called but no track is playing or has been played.`;
 		console.error(errorMessage);
 		emitter.emit('AudioProEvent', {
 			type: AudioProEventType.PLAYBACK_ERROR,
@@ -157,7 +147,7 @@ export function guardTrackPlaying(methodName: string): boolean {
  */
 export function logDebug(...args: unknown[]) {
 	if (useInternalStore.getState().debug) {
-		console.log('~~~', ...args);
+		console.log('[react-native-audio-pro]', ...args);
 	}
 }
 
