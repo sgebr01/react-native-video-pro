@@ -8,7 +8,6 @@ For ambient/secondary playback, see `spec-ambient.md`.
 
 - ✅ Static remote URLs (e.g., `https://example.com/audio.mp3`)
 - ✅ Live streaming URLs (HLS, DASH, RTSP, RTMP)
-- ✅ Local asset files via `require()` (e.g., `require('./track.mp3')`)
 - ✅ Locally downloaded file paths (e.g., `/data/user/0/com.app/files/foo.mp3`)
   - TS layer automatically prefixes with `file://` if not already present.
 
@@ -22,7 +21,6 @@ For ambient/secondary playback, see `spec-ambient.md`.
 - ✅ Reactive state & position updates via hook (`useAudioPro`) and event listener
 - ✅ Fine-grained progress update interval (100ms to 10,000ms, default 1000ms)
 - ✅ Global configuration (e.g., content type: MUSIC vs SPEECH)
-- ✅ Web playback
 
 ## ⚠️ Not Supported (for now)
 

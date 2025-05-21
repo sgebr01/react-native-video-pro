@@ -16,8 +16,6 @@ Ambient audio provides a minimal, isolated layer for ambient or looping audio in
 - **All cleanup is internal** — calling `stopAmbient()` or letting playback end (if `loop: false`) tears down the player.
 - **Main player has no effect** on ambient audio: `play()`, `pause()`, `stop()`, `clear()` do **not** interact with it.
 - Ambient audio must stop and clean up automatically when the app is terminated.
-- Ambient audio supports both remote files (`https://...`) and local asset files via `require(...)`, resolved using `Image.resolveAssetSource(track.url).uri`.
-- All ambient methods remain under the `AudioPro` namespace and must be prefixed with `ambient`. Example: `AudioPro.ambientPlay(...)`
 
 ## API
 
