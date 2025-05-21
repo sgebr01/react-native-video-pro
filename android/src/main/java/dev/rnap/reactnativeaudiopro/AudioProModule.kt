@@ -132,7 +132,7 @@ class AudioProModule(private val reactContext: ReactApplicationContext) :
 	}
 
 	override fun onHostDestroy() {
-		Log.d("AudioProModule", "App is being destroyed, clearing playback")
+		Log.d("[react-native-audio-pro]", "App is being destroyed, clearing playback")
 		AudioProController.clear()
 		AudioProAmbientController.ambientStop()
 	}
