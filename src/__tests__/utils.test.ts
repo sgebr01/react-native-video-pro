@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Platform, Image } from 'react-native';
-
 import { emitter } from '../emitter';
 import { useInternalStore } from '../useInternalStore';
 import {
@@ -10,7 +8,6 @@ import {
 	guardTrackPlaying,
 	logDebug,
 	normalizeVolume,
-	resolveAssetSource,
 } from '../utils';
 import { AudioProEventType } from '../values';
 
@@ -81,12 +78,8 @@ describe('isValidUrl', () => {
 		// Reset mockState for each test
 		mockState.debug = false;
 		// Update the useInternalStore.getState mock
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
-	});
 
-	it('returns true for numbers', () => {
-		expect(isValidUrl(123)).toBe(true);
+		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
 	});
 	it('returns false for empty or whitespace strings', () => {
 		expect(isValidUrl('')).toBe(false);
@@ -193,34 +186,5 @@ describe('logDebug', () => {
 		mockState.debug = false;
 		logDebug('hello', 1);
 		expect(console.log).not.toHaveBeenCalled();
-	});
-});
-
-describe('resolveAssetSource', () => {
-	beforeEach(() => {
-		// Reset mockState for each test
-		mockState.debug = false;
-		// Update the useInternalStore.getState mock
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
-		(Image.resolveAssetSource as jest.Mock).mockClear();
-	});
-	it('prefixes bare keys on Android', () => {
-		Platform.OS = 'android';
-		(Image.resolveAssetSource as jest.Mock).mockReturnValue({ uri: 'assets_key' });
-		const uri = resolveAssetSource(1, 'test');
-		expect(uri).toBe('asset:///assets_key');
-	});
-	it('passes through URIs on Android', () => {
-		Platform.OS = 'android';
-		(Image.resolveAssetSource as jest.Mock).mockReturnValue({ uri: 'file:///path.mp3' });
-		expect(resolveAssetSource(1)).toBe('file:///path.mp3');
-	});
-	it('passes through on iOS', () => {
-		Platform.OS = 'ios';
-		(Image.resolveAssetSource as jest.Mock).mockReturnValue({ uri: 'file:///ios.mp3' });
-		expect(resolveAssetSource(1)).toBe('file:///ios.mp3');
-	});
-	it('returns strings as-is', () => {
-		expect(resolveAssetSource('http://x.com')).toBe('http://x.com');
 	});
 });

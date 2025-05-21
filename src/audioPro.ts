@@ -7,7 +7,6 @@ import {
 	logDebug,
 	normalizeFilePath,
 	normalizeVolume,
-	resolveAssetSource,
 	validateTrack,
 } from './utils';
 import {
@@ -69,9 +68,9 @@ export const AudioPro = {
 	 *
 	 * @param track - The audio track to play
 	 * @param track.id - Unique identifier for the track
-	 * @param track.url - URL of the audio file or a number from require() for local files
+	 * @param track.url - URL of the audio file (http://, https://, or file://)
 	 * @param track.title - Title of the track
-	 * @param track.artwork - URL of the artwork image or a number from require() for local files
+	 * @param track.artwork - URL of the artwork image (http://, https://, or file://)
 	 * @param track.album - Optional album name
 	 * @param track.artist - Optional artist name
 	 * @param options - Optional playback options
@@ -81,17 +80,9 @@ export const AudioPro = {
 	play(track: AudioProTrack, options: AudioProPlayOptions = {}) {
 		const resolvedTrack = { ...track };
 
-		// Resolve asset sources (for require() resources)
-		resolvedTrack.artwork = resolveAssetSource(track.artwork, 'artwork');
-		resolvedTrack.url = resolveAssetSource(track.url, 'audio URL');
-
 		// Normalize file paths to ensure local paths have file:// prefix
-		if (typeof resolvedTrack.url === 'string') {
-			resolvedTrack.url = normalizeFilePath(resolvedTrack.url);
-		}
-		if (typeof resolvedTrack.artwork === 'string') {
-			resolvedTrack.artwork = normalizeFilePath(resolvedTrack.artwork);
-		}
+		resolvedTrack.url = normalizeFilePath(resolvedTrack.url);
+		resolvedTrack.artwork = normalizeFilePath(resolvedTrack.artwork);
 
 		if (!validateTrack(resolvedTrack)) {
 			const errorMessage = 'AudioPro: Invalid track provided to play().';
@@ -379,16 +370,13 @@ export const AudioPro = {
 	 * Play an ambient audio track
 	 *
 	 * @param options - Ambient audio options
-	 * @param options.url - URL of the audio file to play or a number from require() for local files
+	 * @param options.url - URL of the audio file to play (http://, https://, or file://)
 	 * @param options.loop - Whether to loop the audio (default: true)
 	 */
 	ambientPlay(options: AmbientAudioPlayOptions): void {
 		const { url: originalUrl, loop = true } = options;
 
-		// Resolve asset source (for require() resources)
-		let resolvedUrl = resolveAssetSource(originalUrl, 'ambient audio URL');
-
-		if (!resolvedUrl) {
+		if (!originalUrl) {
 			const errorMessage = 'AudioPro: Invalid URL provided to ambientPlay().';
 			console.error(errorMessage);
 			ambientEmitter.emit('AudioProAmbientEvent', {
@@ -401,9 +389,7 @@ export const AudioPro = {
 		}
 
 		// Normalize file path to ensure local paths have file:// prefix
-		if (typeof resolvedUrl === 'string') {
-			resolvedUrl = normalizeFilePath(resolvedUrl);
-		}
+		const resolvedUrl = normalizeFilePath(originalUrl);
 
 		const { debug } = useInternalStore.getState();
 

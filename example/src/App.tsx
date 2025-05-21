@@ -21,7 +21,7 @@ import {
 } from './player-service';
 import { playlist } from './playlist';
 import { styles } from './styles';
-import { copyTestingFiles, formatTime, getStateColor } from './utils';
+import { formatTime, getStateColor } from './utils';
 import { AudioPro } from '../../src/audioPro';
 import { AudioProState } from '../../src/values';
 
@@ -52,10 +52,6 @@ export default function App() {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [playingTrack?.id]);
-
-	useEffect(() => {
-		copyTestingFiles();
-	}, []);
 
 	// Set up ambient audio event listeners
 	useEffect(() => {

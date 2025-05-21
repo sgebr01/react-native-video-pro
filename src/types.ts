@@ -10,11 +10,11 @@ import {
 // TRACK
 // ==============================
 
-export type AudioProArtwork = string | number;
+export type AudioProArtwork = string;
 
 export type AudioProTrack = {
 	id: string;
-	url: string | number;
+	url: string;
 	title: string;
 	artwork: AudioProArtwork;
 	album?: string;
@@ -105,7 +105,7 @@ export interface AudioProPlaybackSpeedChangedPayload {
 // ==============================
 
 export interface AmbientAudioPlayOptions {
-	url: string | number;
+	url: string;
 	loop?: boolean;
 }
 

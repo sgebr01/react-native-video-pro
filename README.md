@@ -204,9 +204,9 @@ AudioPro.configure({
 ```typescript
 type AudioProTrack = {
     id: string;
-    url: string | number; // the media url (mp3, m4a, streaming URLs) or local asset via require()
+    url: string; // the media url (mp3, m4a, streaming URLs) - http://, https://, or file://
     title: string;
-    artwork: string | number; // the image url (jpg, png), or local asset via require()
+    artwork: string; // the image url (jpg, png) - http://, https://, or file://
     album?: string;
     artist?: string;
 };
@@ -279,7 +279,7 @@ interface AudioProAmbientEvent {
 
 // Ambient audio play options
 interface AmbientAudioPlayOptions {
-    url: string | number; // Remote URL or local asset via require()
+    url: string; // Remote URL (http://, https://) or file:// URL
     loop?: boolean; // Default: true
 }
 ```
@@ -393,9 +393,9 @@ AudioPro.configure({
 // Define an audio track (supports static remote files, live streams, and local files)
 const track = {
   id: 'track-001',
-  url: 'https://example.com/audio.mp3', // Remote file, live stream URL, or local file via require()
+  url: 'https://example.com/audio.mp3', // Remote file, live stream URL, or file:// URL
   title: 'My Track',
-  artwork: 'https://example.com/artwork.jpg', // Remote image or local image via require()
+  artwork: 'https://example.com/artwork.jpg', // Remote image or file:// URL
   artist: 'Artist Name',
 };
 
@@ -450,7 +450,7 @@ import { AudioPro } from 'react-native-audio-pro';
 
 // Play ambient audio
 AudioPro.ambientPlay({
-  url: 'https://example.com/ambient.mp3', // Remote URL or local file via require()
+  url: 'https://example.com/ambient.mp3', // Remote URL or file:// URL
   loop: true, // Optional, defaults to true
 });
 
@@ -486,7 +486,7 @@ subscription.remove();
 - **Simple API** - minimal methods with a stateless design
 - **Automatic looping** - ambient audio loops by default
 - **Event handling** - listen for track ended and error events
-- **Local and remote files** - supports both remote URLs and local files via `require()`
+- **Local and remote files** - supports both remote URLs and local files via `file://` URLs
 
 ## ⚠️ Important: Event Listeners and React Lifecycle
 

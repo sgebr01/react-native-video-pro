@@ -1,5 +1,3 @@
-import { Image } from 'react-native';
-
 import { emitter } from './emitter';
 import { useInternalStore } from './useInternalStore';
 import { AudioProEventType } from './values';
@@ -36,12 +34,7 @@ export function normalizeFilePath(path: string): string {
  * A simplified URL validation function that doesn't rely on the URL constructor.
  * It performs basic checks on the URL string to determine if it's valid.
  */
-export function isValidUrl(url: string | number): boolean {
-	// If URL is a number (require() result), it's valid
-	if (typeof url === 'number') {
-		return true;
-	}
-
+export function isValidUrl(url: string): boolean {
 	// Check if the URL is empty or not a string
 	// noinspection SuspiciousTypeOfGuard
 	if (!url || typeof url !== 'string' || !url.trim()) {
@@ -49,7 +42,18 @@ export function isValidUrl(url: string | number): boolean {
 		return false;
 	}
 
-	// Basic check for common URL schemes
+	// Check for supported URL schemes
+	const supportedSchemes = ['http://', 'https://', 'file://'];
+	const isSupported = supportedSchemes.some((scheme) => url.startsWith(scheme));
+
+	// If URL doesn't start with a supported scheme, log a warning but continue
+	if (!isSupported) {
+		console.warn(
+			`[react-native-audio-pro] Unsupported URL scheme: ${url}. Only http://, https://, and file:// URLs are officially supported.`,
+		);
+	}
+
+	// Basic check for common URL schemes (we'll still allow these to work)
 	if (
 		url.startsWith('http://') ||
 		url.startsWith('https://') ||
@@ -181,26 +185,4 @@ export function normalizeVolume(volume: number): number {
 
 	// Format to 2 decimal places and convert back to number
 	return parseFloat(clampedVolume.toFixed(2));
-}
-
-/**
- * Resolves a resource that might be a number from require() to a URI string
- *
- * @param resource - The resource to resolve (string URL or number from require())
- * @param resourceType - The type of resource (for logging purposes)
- * @returns The resolved URI string
- */
-export function resolveAssetSource(
-	resource: string | number,
-	resourceType: string = 'resource',
-): string {
-	// If the resource is already a string, return it as is
-	if (typeof resource === 'string') {
-		return resource;
-	}
-
-	// If the resource is a number (from require()), resolve it to a URI
-	const resolvedUri = Image.resolveAssetSource(resource).uri;
-	logDebug(`Resolved require() ${resourceType} to URI:`, resolvedUri);
-	return resolvedUri;
 }
