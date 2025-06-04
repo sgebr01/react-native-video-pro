@@ -1,4 +1,4 @@
-import { NativeModules, NativeEventEmitter } from 'react-native';
+import { NativeModules, NativeEventEmitter, Platform, DeviceEventEmitter } from 'react-native';
 
 import { useInternalStore } from './useInternalStore';
 import { logDebug } from './utils';
@@ -12,13 +12,15 @@ const NativeAudioPro = NativeModules.AudioPro;
  * Event emitter for main audio player events
  * Used to communicate between native code and JavaScript
  */
-export const emitter = new NativeEventEmitter(NativeAudioPro);
+export const emitter =
+	Platform.OS === 'android' ? DeviceEventEmitter : new NativeEventEmitter(NativeAudioPro);
 
 /**
  * Event emitter for ambient audio events
  * Used to communicate between native code and JavaScript
  */
-export const ambientEmitter = new NativeEventEmitter(NativeAudioPro);
+export const ambientEmitter =
+	Platform.OS === 'android' ? DeviceEventEmitter : new NativeEventEmitter(NativeAudioPro);
 
 /**
  * Global listener for main audio player events
