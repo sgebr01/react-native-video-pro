@@ -12,6 +12,7 @@ Modern, background-capable audio playback for React Native — built for podcast
 - [🔧 Add-On Features](#-add-on-features)
 - [⚙️ Requirements](#-requirements)
 - [🚀 Installation](#-installation)
+- [📦 Expo Integration](#-expo-integration)
 - [📚 API Overview](#api-overview)
 - [⚡️ useAudioPro Hook Example](#useaudiopro-hook-example)
 - [📦 API Usage Example](#api-usage-example)
@@ -93,6 +94,43 @@ buildscript {
     }
 }
 ```
+
+### 📦 Expo Installation
+
+> **Note:** React Native Audio Pro requires a development build when using Expo, as it contains native code that cannot run in Expo Go.
+
+1. Install the required Expo package:
+    ```bash
+    npx expo install expo-build-properties
+    ```
+2. **For iOS, enable Background Modes in your `app.json`:**
+    ```json
+    {
+      "expo": {
+        "ios": {
+          "infoPlist": {
+            "UIBackgroundModes": ["audio"]
+          }
+        }
+      }
+    }
+    ```
+3. **For Android, update your plugins array in `app.json`:**
+    ```json
+    plugins: [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+          },
+        },
+      ],
+    ]
+    ```
+4. The last step is to [create a development build](https://docs.expo.dev/develop/development-builds/create-a-build/).
 
 ## 📚 API Overview
 
