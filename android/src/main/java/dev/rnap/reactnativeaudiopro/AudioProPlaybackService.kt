@@ -146,8 +146,15 @@ open class AudioProPlaybackService : MediaLibraryService() {
 				getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
 			notificationManager.cancel(NOTIFICATION_ID)
 
-			// Stop foreground service
-			stopForeground(true)
+			// Stop foreground service - handle API level differences
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				// For Android 12 (API 31) and above, use the new API
+				stopForeground(STOP_FOREGROUND_REMOVE)
+			} else {
+				// For older Android versions, use the deprecated API
+				@Suppress("DEPRECATION")
+				stopForeground(true)
+			}
 
 			// Stop the service
 			stopSelf()
