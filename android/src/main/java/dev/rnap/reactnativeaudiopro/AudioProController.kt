@@ -311,10 +311,19 @@ object AudioProController {
 		// Clear pending seek state
 		flowPendingSeekPosition = null
 
-		// Stop playback
+		// Stop playback and ensure player is fully released before destroying service
 		runOnUiThread {
-			detachPlayerListener()
-			enginerBrowser?.stop()
+			try {
+				// First stop playback
+				enginerBrowser?.stop()
+				// Then detach listener to prevent callbacks during teardown
+				detachPlayerListener()
+				// Ensure player is released
+				enginerBrowser?.release()
+				log("Player successfully stopped and released")
+			} catch (e: Exception) {
+				Log.e("[react-native-audio-pro]", "Error stopping player", e)
+			}
 		}
 
 		// Clear track and stop timers
@@ -328,8 +337,11 @@ object AudioProController {
 		// Release resources
 		release()
 
-		// Destroy the playback service to remove notification and tear down the media session
-		destroyPlaybackService()
+		// Add a small delay before destroying service to ensure player is fully released
+		Handler(Looper.getMainLooper()).postDelayed({
+			// Destroy the playback service to remove notification and tear down the media session
+			destroyPlaybackService()
+		}, 50)
 
 		// Emit final state
 		emitState(finalState, 0L, 0L)
