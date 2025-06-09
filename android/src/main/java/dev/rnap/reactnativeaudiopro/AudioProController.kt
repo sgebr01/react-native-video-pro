@@ -58,7 +58,7 @@ object AudioProController {
 		}
 	}
 
-	fun setReactContext(context: ReactApplicationContext) {
+	fun setReactContext(context: ReactApplicationContext?) {
 		reactContext = context
 	}
 

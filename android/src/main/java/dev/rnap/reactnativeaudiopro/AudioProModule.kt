@@ -132,15 +132,22 @@ class AudioProModule(private val reactContext: ReactApplicationContext) :
 	}
 
 	override fun onHostDestroy() {
-		Log.d("[react-native-audio-pro]", "App is being destroyed, clearing playback")
-		AudioProController.clear()
-		AudioProAmbientController.ambientStop()
+		if (!reactContext.hasActiveCatalystInstance()) {
+			Log.d("[react-native-audio-pro]", "App is being destroyed, clearing playback")
+			AudioProController.clear()
+			AudioProAmbientController.ambientStop()
+		}
 	}
 
 	override fun onCatalystInstanceDestroy() {
 		Log.d("AudioProModule", "React Native bridge is being destroyed, clearing playback")
 		AudioProController.clear()
 		AudioProAmbientController.ambientStop()
+
+		// Explicitly null out context references
+		AudioProController.setReactContext(null)
+		AudioProAmbientController.setReactContext(null)
+
 		try {
 			reactContext.removeLifecycleEventListener(this)
 		} catch (e: Exception) {
