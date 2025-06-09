@@ -38,9 +38,12 @@ open class AudioProMediaLibrarySessionCallback : MediaLibraryService.MediaLibrar
 		.build()
 
 	private fun getCommandButtons(): List<CommandButton> {
+		AudioProController.log("Checking if next/prev controls are enabled")
 		return if (AudioProController.settingShowNextPrevControls) {
+			AudioProController.log("Next/Prev controls are enabled")
 			listOf(nextButton, prevButton)
 		} else {
+			AudioProController.log("Next/Prev controls are disabled")
 			emptyList()
 		}
 	}

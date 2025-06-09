@@ -48,11 +48,15 @@ export const AudioPro = {
 	/**
 	 * Configure the audio player with the specified options
 	 *
+	 * Note: Configuration changes are stored but only applied when the next `play()` call is made.
+	 * This is by design and applies to all configuration options.
+	 *
 	 * @param options - Configuration options for the audio player
 	 * @param options.contentType - Type of content being played (MUSIC or SPEECH)
 	 * @param options.debug - Enable debug logging
 	 * @param options.debugIncludesProgress - Include progress events in debug logs
 	 * @param options.progressIntervalMs - Interval in milliseconds for progress events
+	 * @param options.showNextPrevControls - Whether to show next/previous controls in notification
 	 */
 	configure(options: AudioProConfigureOptions): void {
 		const { setConfigureOptions, setDebug, setDebugIncludesProgress } =

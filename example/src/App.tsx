@@ -103,6 +103,9 @@ export default function App() {
 			// If paused and we don't need to load a new track, resume
 			AudioPro.resume();
 		} else {
+			AudioPro.configure({
+				showNextPrevControls: true,
+			});
 			// If stopped, or we need to load a new track, play the current track
 			AudioPro.play(currentTrack, {
 				autoPlay,

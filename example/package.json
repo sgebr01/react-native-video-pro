@@ -15,7 +15,7 @@
 		"debug:android": "cd android/ && ./gradlew clean && cd ../ && yarn android:release"
 	},
 	"dependencies": {
-		"@react-native-community/slider": "^4.5.6",
+		"@react-native-community/slider": "^4.5.7",
 		"react": "19.0.0",
 		"react-native": "0.78.1",
 		"zustand": "^5.0.3"
