@@ -26,7 +26,7 @@ import kotlinx.coroutines.guava.await
 object AudioProController {
 	private var reactContext: ReactApplicationContext? = null
 	private lateinit var engineBrowserFuture: ListenableFuture<MediaBrowser>
-	private var enginerBrowser: MediaBrowser? = null
+	var enginerBrowser: MediaBrowser? = null
 	private var engineProgressHandler: Handler? = null
 	private var engineProgressRunnable: Runnable? = null
 	private var enginePlayerListener: Player.Listener? = null
