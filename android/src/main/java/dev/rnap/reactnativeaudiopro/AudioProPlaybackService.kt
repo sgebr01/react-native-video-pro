@@ -85,19 +85,19 @@ open class AudioProPlaybackService : MediaLibraryService() {
 	}
 
 	private fun startForegroundService() {
-    val notificationManagerCompat = NotificationManagerCompat.from(this)
-    ensureNotificationChannel(notificationManagerCompat)
-    
-    val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-        .setSmallIcon(android.R.drawable.ic_media_play) // Use a default system icon
-        .setContentTitle("Audio Pro")
-        .setContentText("Playing audio")
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setOngoing(true)
-        .setAutoCancel(false)
-        .also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
-    
-    startForeground(1, builder.build())
+		val notificationManagerCompat = NotificationManagerCompat.from(this)
+		ensureNotificationChannel(notificationManagerCompat)
+
+		val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+			.setContentTitle("Audio Pro")
+			.setContentText("Playing audio")
+			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+			.setOngoing(true)
+			.setAutoCancel(false)
+			.also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
+
+		startForeground(1, builder.build())
 	}
 
 	/**
