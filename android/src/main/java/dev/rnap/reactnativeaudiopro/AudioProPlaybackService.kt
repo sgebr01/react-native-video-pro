@@ -1,9 +1,11 @@
 package dev.rnap.reactnativeaudiopro
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.OptIn
@@ -33,6 +35,8 @@ open class AudioProPlaybackService : MediaLibraryService() {
 	companion object {
 		private const val NOTIFICATION_ID = 789
 		private const val CHANNEL_ID = "audio_pro_notification_channel_id"
+		private const val EMPTY_NOTIFICATION_ID = 1
+		private const val EMPTY_NOTIFICATION_CHANNEL_ID = "audio_pro_notification_empty_channel_id"
 	}
 
 	/**
@@ -75,29 +79,41 @@ open class AudioProPlaybackService : MediaLibraryService() {
 	@OptIn(UnstableApi::class) // MediaSessionService.setListener
 	override fun onCreate() {
 		super.onCreate()
-		startForegroundService()
+		startAndStopEmptyNotificationToAvoidANR()
 		initializeSessionAndPlayer()
 		setListener(MediaSessionServiceListener())
 	}
 
-	override fun onGetSession(controllerInfo: ControllerInfo): MediaLibrarySession {
-		return mediaLibrarySession
+	/**
+	 * Workaround for the "Context.startForegroundService() did not then call Service.startForeground()"
+	 * within 5s" ANR and crash by creating an empty notification and stopping it right after. For more
+	 * information see https://github.com/doublesymmetry/react-native-track-player/issues/1666
+	 */
+	private fun startAndStopEmptyNotificationToAvoidANR() {
+		val notificationManager =
+			this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.createNotificationChannel(
+			NotificationChannel(
+				EMPTY_NOTIFICATION_CHANNEL_ID,
+				"Empty Notification Channel",
+				NotificationManager.IMPORTANCE_LOW
+			)
+		)
+		val notificationBuilder = NotificationCompat.Builder(this, EMPTY_NOTIFICATION_CHANNEL_ID)
+			.setPriority(NotificationCompat.PRIORITY_LOW)
+			.setCategory(Notification.CATEGORY_SERVICE)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			notificationBuilder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+		}
+		val notification = notificationBuilder.build()
+		startForeground(EMPTY_NOTIFICATION_ID, notification)
+		@Suppress("DEPRECATION")
+		stopForeground(true)
 	}
 
-	private fun startForegroundService() {
-		val notificationManagerCompat = NotificationManagerCompat.from(this)
-		ensureNotificationChannel(notificationManagerCompat)
-
-		val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setContentTitle("Audio Pro")
-			.setContentText("Playing audio")
-			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-			.setOngoing(true)
-			.setAutoCancel(false)
-			.also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
-
-		startForeground(1, builder.build())
+	override fun onGetSession(controllerInfo: ControllerInfo): MediaLibrarySession {
+		return mediaLibrarySession
 	}
 
 	/**
