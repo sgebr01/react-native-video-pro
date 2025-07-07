@@ -15,11 +15,11 @@ export const playlist: Track[] = [
 		artist: 'T. Schurger',
 	},
 	{
-		id: 'stream-track-1',
-		url: 'https://stream-akamai.castr.com/5b9352dbda7b8c769937e459/live_2361c920455111ea85db6911fe397b9e/index.fmp4.m3u8',
-		title: 'Castr Stream (HLS)',
+		id: 'remote-track-2',
+		url: 'https://rnap.dev/audio-soundhelix-song-2-tschurger.mp3',
+		title: 'Soundhelix Song 2',
 		artwork: 'https://rnap.dev/artwork-usgs-8tfu4320oxI-unsplash.jpg',
-		artist: 'Castr',
+		artist: 'T. Schurger',
 	},
 	{
 		id: 'error-track-1',

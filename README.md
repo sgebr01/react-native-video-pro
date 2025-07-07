@@ -1,6 +1,6 @@
 # React Native Audio Pro
 
-Modern, background-capable audio playback for React Native — built for podcasts, audiobooks, live streams, and long-form media. Works out of the box with background playback, lock screen controls, and clean hooks-based state. Under the hood: Android uses Media3 (not old-school ExoPlayer), giving you up-to-date media session support without any of the legacy baggage. iOS uses AVFoundation, Apple's native audio engine for professional-grade media playback. Supports static remote files on iOS and Android.
+Modern, background-capable audio playback for React Native — built for podcasts, audiobooks, and long-form media. Works out of the box with background playback, lock screen controls, and clean hooks-based state. Under the hood: Android uses Media3 (not old-school ExoPlayer), giving you up-to-date media session support without any of the legacy baggage. iOS uses AVFoundation, Apple's native audio engine for professional-grade media playback. Supports static remote files on iOS and Android.
 
 [![npm version](https://img.shields.io/npm/v/react-native-audio-pro?logo=npm&logoColor=white&labelColor=grey&color=blue)](https://www.npmjs.com/package/react-native-audio-pro)
 [![website](https://img.shields.io/badge/website-rnap.dev-grey?logo=google-chrome&logoColor=white&color=blue)](https://rnap.dev)
@@ -24,7 +24,7 @@ Modern, background-capable audio playback for React Native — built for podcast
 
 These are fully supported, maintained features and the foundation of the library:
 
-- 🎵 **HTTPS Audio Playback** — Stream MP3 and other formats over HTTP(S)
+- 🎵 **Remote Audio File Playback** — Play MP3 and other audio files over HTTP(S)
 - 📱 **Background Playback** — Works with screen locked or app backgrounded
 - 🔒 **Lock Screen Controls** — Media control support on Android and iOS
 - 🖼 **Artwork Support** — Display album art on lock screen and media controls (JPEG, PNG, etc.)
@@ -42,7 +42,6 @@ These are fully supported, maintained features and the foundation of the library
 React Native Audio Pro also includes a few optional capabilities that support more advanced or specialized use cases. These are included in the library but may not receive the same level of maintenance priority as the core feature set.
 
 - 🎚 **Ambient Audio API** — A simple secondary player for background or layered audio playback
-- 🔁 **Live Streams** — Many live stream URLs are supported, though not officially tested or guaranteed
 - 📂 **Local Files via File Path** — Supports full `file://` paths (e.g. using `react-native-fs`)
 - 🚦 **Autoplay + Timers** — Supports `autoPlay` and `startTimeMs`. For stop-at logic, use progress events in your app
 
@@ -134,7 +133,7 @@ buildscript {
 
 ## 📚 API Overview
 
-React Native Audio Pro supports various audio formats including MP3, AAC, WAV, and streaming protocols like HLS, DASH, RTSP, and RTMP.
+React Native Audio Pro supports various audio file formats including MP3, AAC, and WAV, delivered over HTTPS.
 
 ### 🛠 Methods
 
@@ -259,9 +258,9 @@ AudioPro.configure({
 ```typescript
 type AudioProTrack = {
     id: string;
-    url: string; // the media url (mp3, m4a, streaming URLs) - http://, https://, or file://
+    url: string; // the media url (mp3, m4a) - https://, or file://
     title: string;
-    artwork: string; // the image url (jpg, png) - http://, https://, or file://
+    artwork: string; // the image url (jpg, png) - https://, or file://
     album?: string;
     artist?: string;
 };
@@ -301,7 +300,6 @@ interface AudioProEvent {
 }
 
 // Note: Command events (REMOTE_NEXT, REMOTE_PREV) don't update state and don't require track information.
-// All other events must include track to ensure state consistency.
 
 // Event payload examples
 interface AudioProStateChangedPayload {
@@ -334,8 +332,8 @@ interface AudioProAmbientEvent {
 
 // Ambient audio play options
 interface AmbientAudioPlayOptions {
-    url: string; // Remote URL (http://, https://) or file:// URL
-    loop?: boolean; // Default: true
+    url: string;
+    loop?: boolean;
 }
 ```
 </details>
@@ -445,22 +443,12 @@ AudioPro.configure({
   debug: __DEV__,
 });
 
-// Define an audio track (supports static remote files, live streams, and file:// URLs)
 const track = {
   id: 'track-001',
-  url: 'https://example.com/audio.mp3', // Remote file, live stream URL, or file:// URL
+  url: 'https://example.com/audio.mp3',
   title: 'My Track',
-  artwork: 'https://example.com/artwork.jpg', // Remote image or file:// URL
+  artwork: 'https://example.com/artwork.jpg',
   artist: 'Artist Name',
-};
-
-// For local files, make sure to use the file:// prefix for paths
-const localTrack = {
-  id: 'local-track-001',
-  url: 'file:///data/user/0/com.myapp/cache/audio.mp3',
-  title: 'Local Track',
-  artwork: 'file:///data/user/0/com.myapp/cache/artwork.jpg',
-  artist: 'Local Artist',
 };
 
 // Load and play the track
@@ -505,17 +493,15 @@ import { AudioPro } from 'react-native-audio-pro';
 
 // Play ambient audio
 AudioPro.ambientPlay({
-  url: 'https://example.com/ambient.mp3', // Remote URL or file:// URL
+  url: 'https://example.com/ambient.mp3',
   loop: true, // Optional, defaults to true
 });
 
-// Basic ambient audio controls
 AudioPro.ambientPause();    // Pause ambient playback
 AudioPro.ambientResume();   // Resume ambient playback
 AudioPro.ambientStop();     // Stop and clean up ambient playback
 AudioPro.ambientSeekTo(30000); // Seek to 30 seconds
 
-// Set ambient audio volume
 AudioPro.ambientSetVolume(0.5); // 50% volume
 
 // Listen for ambient audio events

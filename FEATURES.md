@@ -1,6 +1,6 @@
 # React Native Audio Pro — Feature Scope and Philosophy
 
-**React Native Audio Pro** is a focused, high-performance audio playback library for React Native apps, built for simple, reliable streaming of remote audio on mobile.
+**React Native Audio Pro** is a focused, high-performance audio playback library for React Native apps, built for simple, reliable playback of remote audio files on mobile.
 
 This doc defines what the library **intentionally supports**, what it **may support unofficially**, and what is **explicitly out of scope**.
 
@@ -10,7 +10,7 @@ This doc defines what the library **intentionally supports**, what it **may supp
 
 These are fully supported, maintained features and the foundation of the library:
 
-- 🎵 **HTTPS Audio Playback** — Stream MP3 and other formats over HTTP(S)
+- 🎵 **HTTPS Audio Playback** — Play MP3 and other audio file formats over HTTP(S)
 - 📱 **Background Playback** — Works with screen locked or app backgrounded
 - 🔒 **Lock Screen Controls** — Media control support on Android and iOS
 - 🖼 **Artwork Support** — Display album art on lock screen and media controls (JPEG, PNG, etc.)
@@ -30,7 +30,6 @@ These are fully supported, maintained features and the foundation of the library
 These features **exist in the codebase** but are not part of the core scope. They may work, but bug reports or feature requests related to them will have **low or no priority**:
 
 - 🎚 **Ambient Audio API** — A simple secondary player for background or layered audio playback
-- 🔁 **Live Streams** — Some live stream URLs may work, but are not officially supported
 - 📂 **Local Files via File Path** — File URLs (e.g. `file:///path/to/audio.mp3`) work if passed explicitly using libraries like `react-native-fs`
 - 🚦 **Autoplay + Timers** — `autoPlay` and `startTimeMs` are supported, but you’re responsible for logic like stop-timers or resume handling
 
