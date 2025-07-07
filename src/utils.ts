@@ -1,5 +1,5 @@
 import { emitter } from './emitter';
-import { useInternalStore } from './useInternalStore';
+import { internalStore } from './internalStore';
 import { AudioProEventType } from './values';
 
 import type { AudioProTrack } from './types';
@@ -124,7 +124,7 @@ export function validateTrack(track: AudioProTrack): boolean {
  * @returns true if a track is playing, false otherwise
  */
 export function guardTrackPlaying(methodName: string): boolean {
-	if (!useInternalStore.getState().trackPlaying) {
+	if (!internalStore.getState().trackPlaying) {
 		const errorMessage = `[react-native-audio-pro]: ${methodName} called but no track is playing or has been played.`;
 		console.error(errorMessage);
 		emitter.emit('AudioProEvent', {
@@ -146,7 +146,7 @@ export function guardTrackPlaying(methodName: string): boolean {
  * @param args - Arguments to log
  */
 export function logDebug(...args: unknown[]) {
-	if (useInternalStore.getState().debug) {
+	if (internalStore.getState().debug) {
 		console.log('[react-native-audio-pro]', ...args);
 	}
 }

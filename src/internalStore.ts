@@ -31,7 +31,7 @@ export interface AudioProStore {
 	updateFromEvent: (event: AudioProEvent) => void;
 }
 
-export const useInternalStore = create<AudioProStore>((set, get) => ({
+export const internalStore = create<AudioProStore>((set, get) => ({
 	playerState: AudioProState.IDLE,
 	position: 0,
 	duration: 0,

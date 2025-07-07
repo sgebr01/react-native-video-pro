@@ -1,7 +1,7 @@
 import { NativeModules } from 'react-native';
 
 import { AudioPro } from '../audioPro';
-import { useInternalStore } from '../useInternalStore';
+import { internalStore } from '../internalStore';
 
 import type { AudioProTrack } from '../types';
 
@@ -118,7 +118,7 @@ describe('AudioPro playback control functionality', () => {
 
 	it('updates progress interval in store', () => {
 		AudioPro.setProgressInterval(1000);
-		expect(useInternalStore.getState().setConfigureOptions).toHaveBeenCalledWith(
+		expect(internalStore.getState().setConfigureOptions).toHaveBeenCalledWith(
 			expect.objectContaining({
 				progressIntervalMs: 1000,
 			}),
@@ -171,7 +171,7 @@ describe('AudioPro configuration', () => {
 			debugIncludesProgress: true,
 		});
 
-		expect(useInternalStore.getState().setConfigureOptions).toHaveBeenCalledWith(
+		expect(internalStore.getState().setConfigureOptions).toHaveBeenCalledWith(
 			expect.objectContaining({
 				debug: true,
 				progressIntervalMs: 500,
@@ -222,7 +222,7 @@ describe('AudioPro clear functionality', () => {
 		AudioPro.clear();
 
 		expect(NativeModules.AudioPro.clear).toHaveBeenCalled();
-		expect(useInternalStore.getState().setTrackPlaying).toHaveBeenCalledWith(null);
-		expect(useInternalStore.getState().setVolume).toHaveBeenCalledWith(1.0);
+		expect(internalStore.getState().setTrackPlaying).toHaveBeenCalledWith(null);
+		expect(internalStore.getState().setVolume).toHaveBeenCalledWith(1.0);
 	});
 });

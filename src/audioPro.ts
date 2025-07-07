@@ -1,7 +1,7 @@
 import { NativeModules } from 'react-native';
 
 import { ambientEmitter, emitter } from './emitter';
-import { useInternalStore } from './useInternalStore';
+import { internalStore } from './internalStore';
 import {
 	guardTrackPlaying,
 	logDebug,
@@ -36,7 +36,7 @@ const NativeAudioPro = NativeModules.AudioPro;
  * @internal
  */
 function isValidPlayerStateForOperation(operation: string): boolean {
-	const { playerState } = useInternalStore.getState();
+	const { playerState } = internalStore.getState();
 	if (playerState === AudioProState.IDLE || playerState === AudioProState.ERROR) {
 		logDebug(`AudioPro: ${operation} ignored - player in`, playerState, 'state');
 		return false;
@@ -61,7 +61,7 @@ export const AudioPro = {
 	 */
 	configure(options: AudioProConfigureOptions): void {
 		const { setConfigureOptions, setDebug, setDebugIncludesProgress } =
-			useInternalStore.getState();
+			internalStore.getState();
 		setConfigureOptions({ ...DEFAULT_CONFIG, ...options });
 		setDebug(!!options.debug);
 		setDebugIncludesProgress(options.debugIncludesProgress ?? false);
@@ -104,7 +104,7 @@ export const AudioPro = {
 		}
 
 		const { error, setError, configureOptions, playbackSpeed, setTrackPlaying, volume } =
-			useInternalStore.getState();
+			internalStore.getState();
 
 		// Clear errors and set track as playing
 		setTrackPlaying(resolvedTrack);
@@ -149,7 +149,7 @@ export const AudioPro = {
 		if (!isValidPlayerStateForOperation('resume()')) return;
 
 		// Clear any existing error
-		const { error, setError } = useInternalStore.getState();
+		const { error, setError } = internalStore.getState();
 		if (error) {
 			setError(null);
 		}
@@ -162,7 +162,7 @@ export const AudioPro = {
 	 */
 	stop() {
 		logDebug('AudioPro: stop()');
-		const { error, setError } = useInternalStore.getState();
+		const { error, setError } = internalStore.getState();
 		if (error) {
 			setError(null);
 		}
@@ -175,7 +175,7 @@ export const AudioPro = {
 	 */
 	clear() {
 		logDebug('AudioPro: clear()');
-		const { error, setError, setTrackPlaying, setVolume } = useInternalStore.getState();
+		const { error, setError, setTrackPlaying, setVolume } = internalStore.getState();
 		if (error) {
 			setError(null);
 		}
@@ -239,7 +239,7 @@ export const AudioPro = {
 	 * @returns Object containing position and duration in milliseconds
 	 */
 	getTimings() {
-		const { position, duration } = useInternalStore.getState();
+		const { position, duration } = internalStore.getState();
 		return { position, duration };
 	},
 
@@ -249,7 +249,7 @@ export const AudioPro = {
 	 * @returns Current playback state (IDLE, STOPPED, LOADING, PLAYING, PAUSED, ERROR)
 	 */
 	getState() {
-		return useInternalStore.getState().playerState;
+		return internalStore.getState().playerState;
 	},
 
 	/**
@@ -258,7 +258,7 @@ export const AudioPro = {
 	 * @returns Currently playing track or null if no track is playing
 	 */
 	getPlayingTrack() {
-		return useInternalStore.getState().trackPlaying;
+		return internalStore.getState().trackPlaying;
 	},
 
 	/**
@@ -275,7 +275,7 @@ export const AudioPro = {
 		}
 
 		logDebug('AudioPro: setPlaybackSpeed()', validatedSpeed);
-		const { setPlaybackSpeed, trackPlaying } = useInternalStore.getState();
+		const { setPlaybackSpeed, trackPlaying } = internalStore.getState();
 		setPlaybackSpeed(validatedSpeed);
 
 		if (trackPlaying) {
@@ -290,7 +290,7 @@ export const AudioPro = {
 	 * @returns Current playback speed rate (0.25 to 2.0, normal speed is 1.0)
 	 */
 	getPlaybackSpeed() {
-		return useInternalStore.getState().playbackSpeed;
+		return internalStore.getState().playbackSpeed;
 	},
 
 	/**
@@ -309,7 +309,7 @@ export const AudioPro = {
 		const normalizedVolume = normalizeVolume(clampedVolume);
 		logDebug('AudioPro: setVolume()', normalizedVolume);
 
-		const { setVolume, trackPlaying } = useInternalStore.getState();
+		const { setVolume, trackPlaying } = internalStore.getState();
 		setVolume(normalizedVolume);
 
 		if (trackPlaying) {
@@ -324,7 +324,7 @@ export const AudioPro = {
 	 * @returns Current volume level (0.0 to 1.0)
 	 */
 	getVolume() {
-		return useInternalStore.getState().volume;
+		return internalStore.getState().volume;
 	},
 
 	/**
@@ -333,7 +333,7 @@ export const AudioPro = {
 	 * @returns Last error or null if no error has occurred
 	 */
 	getError() {
-		return useInternalStore.getState().error;
+		return internalStore.getState().error;
 	},
 
 	/**
@@ -353,7 +353,7 @@ export const AudioPro = {
 		}
 
 		logDebug('AudioPro: setProgressInterval()', clampedMs);
-		const { setConfigureOptions, configureOptions } = useInternalStore.getState();
+		const { setConfigureOptions, configureOptions } = internalStore.getState();
 		setConfigureOptions({ ...configureOptions, progressIntervalMs: clampedMs });
 	},
 
@@ -364,7 +364,7 @@ export const AudioPro = {
 	 */
 	getProgressInterval() {
 		return (
-			useInternalStore.getState().configureOptions.progressIntervalMs ??
+			internalStore.getState().configureOptions.progressIntervalMs ??
 			DEFAULT_CONFIG.progressIntervalMs
 		);
 	},
@@ -398,7 +398,7 @@ export const AudioPro = {
 		validateFilePath(originalUrl);
 		const resolvedUrl = originalUrl;
 
-		const { debug } = useInternalStore.getState();
+		const { debug } = internalStore.getState();
 
 		logDebug('AudioPro: ambientPlay()', { url: resolvedUrl, loop });
 		NativeAudioPro.ambientPlay({ url: resolvedUrl, loop, debug });

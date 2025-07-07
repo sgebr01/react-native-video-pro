@@ -54,7 +54,7 @@ const mockActions = {
 	updateFromEvent: jest.fn(),
 };
 
-jest.mock('./src/useInternalStore', () => ({
+jest.mock('./src/internalStore', () => ({
 	useInternalStore: {
 		getState: () => ({
 			...mockState,

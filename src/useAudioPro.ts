@@ -1,6 +1,6 @@
 import { useShallow } from 'zustand/react/shallow';
 
-import { useInternalStore } from './useInternalStore';
+import { internalStore } from './internalStore';
 
 /**
  * React hook for accessing the current state of the audio player
@@ -15,18 +15,17 @@ import { useInternalStore } from './useInternalStore';
  * - error: Current error state or null if no error exists
  */
 export const useAudioPro = () => {
-	const { state, position, duration, playingTrack, playbackSpeed, volume, error } =
-		useInternalStore(
-			useShallow((zustandState) => ({
-				state: zustandState.playerState,
-				position: zustandState.position,
-				duration: zustandState.duration,
-				playingTrack: zustandState.trackPlaying,
-				playbackSpeed: zustandState.playbackSpeed,
-				volume: zustandState.volume,
-				error: zustandState.error,
-			})),
-		);
+	const { state, position, duration, playingTrack, playbackSpeed, volume, error } = internalStore(
+		useShallow((zustandState) => ({
+			state: zustandState.playerState,
+			position: zustandState.position,
+			duration: zustandState.duration,
+			playingTrack: zustandState.trackPlaying,
+			playbackSpeed: zustandState.playbackSpeed,
+			volume: zustandState.volume,
+			error: zustandState.error,
+		})),
+	);
 	return {
 		state,
 		position,

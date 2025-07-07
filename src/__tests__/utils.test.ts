@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { emitter } from '../emitter';
-import { useInternalStore } from '../useInternalStore';
+import { internalStore } from '../internalStore';
 import {
 	isValidUrl,
 	validateTrack,
@@ -61,7 +61,7 @@ describe('isValidUrl', () => {
 		// Reset mockState for each test
 		mockState.debug = false;
 		// Update the useInternalStore.getState mock
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
+		jest.spyOn(internalStore, 'getState').mockImplementation(() => mockState as any);
 		jest.spyOn(console, 'warn').mockImplementation(() => {});
 	});
 	it('returns false for empty or whitespace strings', () => {
@@ -124,7 +124,7 @@ describe('validateTrack', () => {
 		// Reset mockState for each test
 		mockState.debug = false;
 		// Update the useInternalStore.getState mock
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
+		jest.spyOn(internalStore, 'getState').mockImplementation(() => mockState as any);
 	});
 
 	it('returns true for a valid track', () => {
@@ -150,7 +150,7 @@ describe('guardTrackPlaying', () => {
 		// Reset mockState for each test
 		mockState.trackPlaying = null;
 		// Update the useInternalStore.getState mock
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
+		jest.spyOn(internalStore, 'getState').mockImplementation(() => mockState as any);
 		(emitter.emit as jest.Mock).mockClear();
 		// Mock console.error to prevent actual error messages in tests
 		jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -178,7 +178,7 @@ describe('logDebug', () => {
 		// Reset mockState for each test
 		mockState.debug = false;
 		// Update the useInternalStore.getState mock
-		jest.spyOn(useInternalStore, 'getState').mockImplementation(() => mockState as any);
+		jest.spyOn(internalStore, 'getState').mockImplementation(() => mockState as any);
 		jest.spyOn(console, 'log').mockImplementation(() => {});
 	});
 	it('logs when debug true', () => {
