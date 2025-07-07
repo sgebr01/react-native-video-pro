@@ -94,7 +94,8 @@ object AudioProController {
 		val autoPlay: Boolean,
 		val startTimeMs: Long?,
 		val progressIntervalMs: Long,
-		val showNextPrevControls: Boolean
+		val showNextPrevControls: Boolean,
+		val skipInterval: Double,
 	)
 
 	// Extracts and applies play options from JS before playback
@@ -141,8 +142,16 @@ object AudioProController {
 		settingSkipIntervalSeconds = skipInterval
 
 		return PlaybackOptions(
-			contentType, enableDebug, includeProgressInDebug,
-			speed, volume, autoPlay, startTimeMs, progressInterval, showControls
+			contentType,
+			enableDebug,
+			includeProgressInDebug,
+			speed,
+			volume,
+			autoPlay,
+			startTimeMs,
+			progressInterval,
+			showControls,
+			skipInterval,
 		)
 	}
 
