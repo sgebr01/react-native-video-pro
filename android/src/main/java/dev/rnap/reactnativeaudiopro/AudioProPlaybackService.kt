@@ -97,7 +97,7 @@ open class AudioProPlaybackService : MediaLibraryService() {
 			.setAutoCancel(false)
 			.also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
 
-		startForeground(1, builder.build())
+		startForeground(NOTIFICATION_ID, builder.build())
 	}
 
 	/**
