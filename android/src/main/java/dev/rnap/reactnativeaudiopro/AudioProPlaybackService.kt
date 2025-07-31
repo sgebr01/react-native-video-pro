@@ -36,30 +36,30 @@ open class AudioProPlaybackService : MediaLibraryService() {
 	}
 
 	/**
-	 * Returns the single top session activity. It is used by the notification when the app task is
-	 * active and an activity is in the fore or background.
+	 * Brings app to foreground when notification or session is tapped.
 	 *
-	 * Tapping the notification then typically should trigger a single top activity. This way, the
-	 * user navigates to the previous activity when pressing back.
+	 * This method is used by the notification and session to provide an intent that brings the app
+	 * to the foreground. Typically, this intent will launch the main activity with appropriate flags
+	 * to avoid creating multiple instances.
 	 *
-	 * If null is returned, [MediaSession.setSessionActivity] is not set by the demo service.
+	 * If null is returned, [MediaSession.setSessionActivity] is not set by the service.
 	 */
-	open fun getSingleTopActivity(): PendingIntent? = null
-
-	/**
-	 * Returns a back stacked session activity that is used by the notification when the service is
-	 * running standalone as a foreground service. This is typically the case after the app has been
-	 * dismissed from the recent tasks, or after automatic playback resumption.
-	 *
-	 * Typically, a playback activity should be started with a stack of activities underneath. This
-	 * way, when pressing back, the user doesn't land on the home screen of the device, but on an
-	 * activity defined in the back stack.
-	 *
-	 * See [androidx.core.app.TaskStackBuilder] to construct a back stack.
-	 *
-	 * If null is returned, [MediaSession.setSessionActivity] is not set by the demo service.
-	 */
-	open fun getBackStackedActivity(): PendingIntent? = null
+	fun getSessionActivityIntent(): PendingIntent? {
+		val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+			action = android.content.Intent.ACTION_MAIN
+			addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+			flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+				android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+		}
+		return launchIntent?.let {
+			PendingIntent.getActivity(
+				this,
+				0,
+				it,
+				PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+			)
+		}
+	}
 
 	/**
 	 * Creates the library session callback to implement the domain logic. Can be overridden to return
@@ -95,7 +95,7 @@ open class AudioProPlaybackService : MediaLibraryService() {
 			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 			.setOngoing(true)
 			.setAutoCancel(false)
-			.also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
+			.also { builder -> getSessionActivityIntent()?.let { builder.setContentIntent(it) } }
 
 		startForeground(NOTIFICATION_ID, builder.build())
 	}
@@ -225,7 +225,7 @@ open class AudioProPlaybackService : MediaLibraryService() {
 
 		mediaLibrarySession =
 			MediaLibrarySession.Builder(this, player, createLibrarySessionCallback())
-				.also { builder -> getSingleTopActivity()?.let { builder.setSessionActivity(it) } }
+				.also { builder -> getSessionActivityIntent()?.let { builder.setSessionActivity(it) } }
 				.build()
 				.also { mediaLibrarySession ->
 					// The media session always supports skip, except at the start and end of the playlist.
@@ -270,7 +270,7 @@ open class AudioProPlaybackService : MediaLibraryService() {
 					//)
 					.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 					.setAutoCancel(true)
-					.also { builder -> getBackStackedActivity()?.let { builder.setContentIntent(it) } }
+					.also { builder -> getSessionActivityIntent()?.let { builder.setContentIntent(it) } }
 			notificationManagerCompat.notify(NOTIFICATION_ID, builder.build())
 		}
 	}
