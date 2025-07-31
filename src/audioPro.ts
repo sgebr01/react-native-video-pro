@@ -59,13 +59,32 @@ export const AudioPro = {
 	 * @param options.skipInterval - Skip interval in seconds
 	 * @param options.showNextPrevControls - Whether to show next/previous controls in notification
 	 */
+	/**
+	 * Configure the audio player with the specified options.
+	 *
+	 * Note: Configuration changes are stored but only applied when the next `play()` call is made.
+	 * This is by design and applies to all configuration options.
+	 *
+	 * Mutual exclusivity between showNextPrevControls and showSkipControls is enforced here.
+	 * If both are true, showSkipControls will be set to false and a warning logged.
+	 *
+	 * @param options - Configuration options for the audio player
+	 */
 	configure(options: AudioProConfigureOptions): void {
 		const { setConfigureOptions, setDebug, setDebugIncludesProgress } =
 			internalStore.getState();
-		setConfigureOptions({ ...DEFAULT_CONFIG, ...options });
+		let config: AudioProConfigureOptions = { ...DEFAULT_CONFIG, ...options };
+		if (config.showNextPrevControls === true && config.showSkipControls === true) {
+			// If both are true, showSkipControls must be false.
+			console.warn(
+				'[react-native-audio-pro]: showNextPrevControls and showSkipControls are mutually exclusive. showSkipControls will be set to false.',
+			);
+			config = { ...config, showSkipControls: false };
+		}
+		setConfigureOptions(config);
 		setDebug(!!options.debug);
 		setDebugIncludesProgress(options.debugIncludesProgress ?? false);
-		logDebug('AudioPro: configure()', options);
+		logDebug('AudioPro: configure()', config);
 	},
 
 	/**

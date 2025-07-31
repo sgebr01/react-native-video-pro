@@ -227,14 +227,42 @@ const { state, position, duration, playingTrack, playbackSpeed, volume, error } 
 
 Both iOS and Android support lock screen and notification controls for play/pause, seek, and track navigation (next/previous).
 
-You can hide the next/previous buttons on the lock screen by setting `showNextPrevControls: false` in the configuration options. This is useful for apps that only play single tracks and don't need playlist navigation controls:
+**Configuration options:**
 
 ```typescript
 AudioPro.configure({
   contentType: AudioProContentType.MUSIC,
-  showNextPrevControls: false, // Hide next/previous buttons on lock screen
+  showNextPrevControls: false, // Hide next/previous buttons
+  showSkipControls: true,      // Show skip/seek forward/back buttons (default: true)
+  skipInterval: 30,            // Number of seconds for skip/seek (default: 30)
 });
 ```
+
+- `showNextPrevControls` — Show next/previous buttons for playlist navigation (default: `true`).
+  If enabled, lock screen and notification controls will include Next and Previous.
+  If your app only plays single tracks, set to `false`.
+- `showSkipControls` — Show skip/seek forward/backward buttons (default: `true`).
+  If enabled, lock screen and notification controls will include skip forward/backward (seek) buttons.
+- `skipInterval` — The interval (in seconds) used for skip forward/back controls.
+  If not set, defaults to 30 seconds.
+
+> ⚠️ **Only one set of controls can be active at a time.**
+> If both `showNextPrevControls` and `showSkipControls` are set to `true`, only Next/Prev controls will be shown (Skip controls will be ignored).
+
+**Example:**
+
+```typescript
+AudioPro.configure({
+  contentType: AudioProContentType.SPEECH,
+  showNextPrevControls: false,
+  showSkipControls: true,      // Only show skip/seek buttons
+  skipInterval: 15,            // 15 second skip
+});
+```
+
+**iOS note:**
+Due to platform constraints, iOS only supports showing either Next/Prev or Skip controls, not both.
+Android supports both options but will prioritize Next/Prev if both are enabled.
 
 ### 🎵 Ambient Audio Methods (Stateless Fire-and-Forget)
 
@@ -267,10 +295,12 @@ type AudioProTrack = {
 
 type AudioProSetupOptions = {
     contentType?: AudioProContentType; // MUSIC or SPEECH
-    debug?: boolean; // Verbose logging
-    debugIncludesProgress?: boolean; // Whether to include progress events in debug logs (default: false)
-    progressIntervalMs?: number; // Frequency (in ms) at which PROGRESS events are emitted (default: 1000ms)
-    showNextPrevControls?: boolean; // Whether to show next/previous buttons on lock screen (default: true)
+    debug?: boolean;                   // Verbose logging
+    debugIncludesProgress?: boolean;   // Include PROGRESS events in debug logs (default: false)
+    progressIntervalMs?: number;       // Frequency (in ms) for PROGRESS events (default: 1000ms)
+    showNextPrevControls?: boolean;    // Show next/previous buttons (default: true)
+    showSkipControls?: boolean;        // Show skip/seek forward/back buttons (default: true)
+    skipInterval?: number;             // Skip interval in seconds (default: 30)
 };
 
 type AudioProPlayOptions = {

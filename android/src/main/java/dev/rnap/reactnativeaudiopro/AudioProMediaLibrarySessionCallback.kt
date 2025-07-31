@@ -90,9 +90,17 @@ open class AudioProMediaLibrarySessionCallback : MediaLibraryService.MediaLibrar
 	val mediaNotificationSessionCommands
 		get() = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
 			.also { builder ->
-				getCommandButtons().forEach { commandButton ->
-					commandButton.sessionCommand?.let { builder.add(it) }
+				// Add custom commands based on settings
+				if (AudioProController.settingShowNextPrevControls) {
+					// Add next and previous commands
+					builder.add(SessionCommand(CUSTOM_COMMAND_NEXT, Bundle.EMPTY))
+					builder.add(SessionCommand(CUSTOM_COMMAND_PREV, Bundle.EMPTY))
+				} else if (AudioProController.settingShowSkipControls) {
+					// Add skip forward and skip backward commands
+					builder.add(SessionCommand(CUSTOM_COMMAND_SKIP_FORWARD, Bundle.EMPTY))
+					builder.add(SessionCommand(CUSTOM_COMMAND_SKIP_BACKWARD, Bundle.EMPTY))
 				}
+				// If both settings are false, no custom commands are added, only default commands
 			}
 			.build()
 
@@ -119,15 +127,18 @@ open class AudioProMediaLibrarySessionCallback : MediaLibraryService.MediaLibrar
 				AudioProController.emitNext()
 				return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
 			}
+
 			CUSTOM_COMMAND_PREV -> {
 				AudioProController.emitPrev()
 				return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
 			}
+
 			CUSTOM_COMMAND_SKIP_FORWARD -> {
 				val skipAmountMs = (AudioProController.settingSkipIntervalSeconds * 1000).toLong()
 				AudioProController.seekForward(skipAmountMs)
 				return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
 			}
+
 			CUSTOM_COMMAND_SKIP_BACKWARD -> {
 				val skipAmountMs = (AudioProController.settingSkipIntervalSeconds * 1000).toLong()
 				AudioProController.seekBack(skipAmountMs)

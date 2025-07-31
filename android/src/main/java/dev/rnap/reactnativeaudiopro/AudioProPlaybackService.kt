@@ -228,15 +228,37 @@ open class AudioProPlaybackService : MediaLibraryService() {
 				.also { builder -> getSessionActivityIntent()?.let { builder.setSessionActivity(it) } }
 				.build()
 				.also { mediaLibrarySession ->
-					// The media session always supports skip, except at the start and end of the playlist.
-					// Reserve the space for the skip action in these cases to avoid custom actions jumping
-					// around when the user skips.
-					mediaLibrarySession.setSessionExtras(
-						bundleOf(
-							MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV to true,
-							MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT to true,
+					// Reserve only one set of controls per session: next/prev or skip, not both.
+					// If both are true, prefer next/prev and log a warning.
+					val extras = mutableMapOf<String, Boolean>()
+					val showNextPrev = AudioProController.settingShowNextPrevControls
+					val showSkip = AudioProController.settingShowSkipControls
+					if (showNextPrev && showSkip) {
+						android.util.Log.w(
+							"AudioProPlaybackService",
+							"Both settingShowNextPrevControls and settingShowSkipControls are true; only next/prev controls will be enabled for this session."
 						)
-					)
+					}
+					// Only one set of controls can be active at a time.
+					if (showNextPrev) {
+						// Reserve next/prev (seek) slots and advertise only next/prev commands.
+						extras[MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV] = true
+						extras[MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT] = true
+					} else if (showSkip) {
+						// Reserve skip/seek slots and advertise only fast forward/back commands.
+						extras[MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV] = true
+						extras[MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT] = true
+					}
+					// If neither, explicitly clear all session extras to remove notification control slots.
+					// This ensures that when neither next/prev nor skip controls are enabled,
+					// no control slots are reserved and only play/pause is advertised.
+					if (extras.isNotEmpty()) {
+						mediaLibrarySession.setSessionExtras(bundleOf(*extras.entries.map { it.key to it.value }
+							.toTypedArray()))
+					} else {
+						// Explicitly clear extras.
+						mediaLibrarySession.setSessionExtras(bundleOf())
+					}
 				}
 	}
 

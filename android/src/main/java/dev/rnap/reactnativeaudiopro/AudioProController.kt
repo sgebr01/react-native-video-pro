@@ -45,6 +45,7 @@ object AudioProController {
 	private var settingProgressIntervalMs: Long = 1000
 	var settingAudioContentType: Int = C.AUDIO_CONTENT_TYPE_MUSIC
 	var settingShowNextPrevControls: Boolean = true
+	var settingShowSkipControls: Boolean = true
 	var settingSkipIntervalSeconds: Double = 10.0
 
 	var headersAudio: Map<String, String>? = null
@@ -95,10 +96,12 @@ object AudioProController {
 		val startTimeMs: Long?,
 		val progressIntervalMs: Long,
 		val showNextPrevControls: Boolean,
+		val showSkipControls: Boolean,
 		val skipInterval: Double,
 	)
 
 	// Extracts and applies play options from JS before playback
+	// Enforces mutual exclusivity between next/prev and skip controls for session config.
 	private fun extractPlaybackOptions(options: ReadableMap): PlaybackOptions {
 		val contentType = if (options.hasKey("contentType")) {
 			options.getString("contentType") ?: "MUSIC"
@@ -117,6 +120,8 @@ object AudioProController {
 				.toLong() else 1000L
 		val showControls =
 			if (options.hasKey("showNextPrevControls")) options.getBoolean("showNextPrevControls") else true
+		val showSkip =
+			if (options.hasKey("showSkipControls")) options.getBoolean("showSkipControls") else true
 		val skipInterval =
 			if (options.hasKey("skipInterval")) options.getDouble("skipInterval") else 10.0
 
@@ -126,6 +131,25 @@ object AudioProController {
 				"[react-native-audio-pro]",
 				"showNextPrevControls changed mid-session; call clear() before changing."
 			)
+		}
+		// Warn if showSkipControls is changed after session initialization
+		if (::engineBrowserFuture.isInitialized && enginerBrowser != null && showSkip != settingShowSkipControls) {
+			Log.w(
+				"[react-native-audio-pro]",
+				"showSkipControls changed mid-session; call clear() before changing."
+			)
+		}
+
+		// Enforce mutual exclusivity for session config: only one set of controls is enabled.
+		var resolvedShowNextPrev = showControls
+		var resolvedShowSkip = showSkip
+		if (showControls && showSkip) {
+			// If both are requested, prefer next/prev and log a warning.
+			Log.w(
+				"[react-native-audio-pro]",
+				"Both showNextPrevControls and showSkipControls are true; only next/prev controls will be enabled for this session."
+			)
+			resolvedShowSkip = false
 		}
 
 		// Apply to controller state
@@ -138,7 +162,8 @@ object AudioProController {
 		activePlaybackSpeed = speed
 		activeVolume = volume
 		settingProgressIntervalMs = progressInterval
-		settingShowNextPrevControls = showControls
+		settingShowNextPrevControls = resolvedShowNextPrev
+		settingShowSkipControls = resolvedShowSkip
 		settingSkipIntervalSeconds = skipInterval
 
 		return PlaybackOptions(
@@ -150,7 +175,8 @@ object AudioProController {
 			autoPlay,
 			startTimeMs,
 			progressInterval,
-			showControls,
+			resolvedShowNextPrev,
+			resolvedShowSkip,
 			skipInterval,
 		)
 	}
@@ -188,7 +214,20 @@ object AudioProController {
 			flowPendingSeekPosition = opts.startTimeMs
 		}
 
-		log("Configured with contentType=${opts.contentType} debug=${opts.enableDebug} speed=${opts.speed} volume=${opts.volume} autoPlay=${opts.autoPlay} skipInterval=${opts.skipInterval}")
+		log(
+			"Configured with " +
+				"contentType=${opts.contentType} " +
+				"enableDebug=${opts.enableDebug} " +
+				"includeProgressInDebug=${opts.includeProgressInDebug} " +
+				"speed=${opts.speed} " +
+				"volume=${opts.volume} " +
+				"autoPlay=${opts.autoPlay} " +
+				"startTimeMs=${opts.startTimeMs} " +
+				"progressIntervalMs=${opts.progressIntervalMs} " +
+				"showNextPrevControls=${opts.showNextPrevControls} " +
+				"showSkipControls=${opts.showSkipControls} " +
+				"skipInterval=${opts.skipInterval}"
+		)
 
 		val url = track.getString("url") ?: run {
 			log("Missing track URL")
