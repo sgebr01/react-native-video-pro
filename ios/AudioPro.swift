@@ -1141,9 +1141,9 @@ class AudioPro: RCTEventEmitter {
 		// This enables VoiceOver Magic Tap (two-finger double-tap) functionality
 		commandCenter.togglePlayPauseCommand.addTarget { [weak self] _ in
 			guard let self = self, let player = self.player else { return .commandFailed }
-			
+
 			self.log("Magic Tap (togglePlayPause) triggered")
-			
+
 			if player.rate > 0 {
 				// Currently playing → pause
 				self.pause()
@@ -1155,19 +1155,19 @@ class AudioPro: RCTEventEmitter {
 				self.log("Magic Tap: Resumed")
 				return .success
 			}
-			
+
 			return .commandFailed
 		}
 
 		commandCenter.nextTrackCommand.addTarget { [weak self] _ in
 			guard let self = self else { return .commandFailed }
-			self.sendEvent(type: self.EVENT_TYPE_REMOTE_NEXT, track: self.currentTrack, payload: [:])
+			self.sendEvent(type: self.EVENT_TYPE_REMOTE_NEXT, track: self.currentTrack, payload: ["state": self.lastEmittedState])
 			return .success
 		}
 
 		commandCenter.previousTrackCommand.addTarget { [weak self] _ in
 			guard let self = self else { return .commandFailed }
-			self.sendEvent(type: self.EVENT_TYPE_REMOTE_PREV, track: self.currentTrack, payload: [:])
+			self.sendEvent(type: self.EVENT_TYPE_REMOTE_PREV, track: self.currentTrack, payload: ["state": self.lastEmittedState])
 			return .success
 		}
 

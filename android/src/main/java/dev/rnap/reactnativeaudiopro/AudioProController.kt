@@ -856,11 +856,17 @@ object AudioProController {
 	}
 
 	fun emitNext(reason: String = "") {
-		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_NEXT, activeTrack, Arguments.createMap(), reason)
+		val payload = Arguments.createMap().apply {
+			putString("state", flowLastEmittedState)
+		}
+		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_NEXT, activeTrack, payload, reason)
 	}
 
 	fun emitPrev(reason: String = "") {
-		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_PREV, activeTrack, Arguments.createMap(), reason)
+		val payload = Arguments.createMap().apply {
+			putString("state", flowLastEmittedState)
+		}
+		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_PREV, activeTrack, payload, reason)
 	}
 
 	fun setPlaybackSpeed(speed: Float) {
