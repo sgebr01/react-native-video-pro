@@ -94,6 +94,8 @@ export const DEFAULT_CONFIG: AudioProConfigureOptions = {
 	progressIntervalMs: 1000,
 	/** Whether to show next/previous controls */
 	showNextPrevControls: true,
+	/** Whether to show skip forward/back controls in notification */
+	showSkipControls: false,
 	/** Skip interval in seconds */
 	skipInterval: DEFAULT_SKIP_INTERVAL,
 };

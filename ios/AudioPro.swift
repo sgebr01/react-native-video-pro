@@ -61,6 +61,7 @@ class AudioPro: RCTEventEmitter {
 	private var settingDebugIncludeProgress: Bool = false
 	private var settingProgressInterval: TimeInterval = 1.0
 	private var settingShowNextPrevControls = true
+	private var settingShowSkipControls = false
 	private var settingLoopAmbient: Bool = true
 
 	private var activeVolume: Float = 1.0
@@ -290,6 +291,7 @@ class AudioPro: RCTEventEmitter {
 		let volume = Float(options["volume"] as? Double ?? 1.0)
 		let autoPlay = options["autoPlay"] as? Bool ?? true
 		settingShowNextPrevControls = options["showNextPrevControls"] as? Bool ?? true
+		settingShowSkipControls = options["showSkipControls"] as? Bool ?? false
 		pendingStartTimeMs = options["startTimeMs"] as? Double
 
 		if let skipInterval = options["skipInterval"] as? Double {
@@ -1080,30 +1082,31 @@ class AudioPro: RCTEventEmitter {
 		if isRemoteCommandCenterSetup { return }
 		let commandCenter = MPRemoteCommandCenter.shared()
 
-		// Configure all commands including Magic Tap support
-		var commands: [(MPRemoteCommand, Bool)] = [
-			(commandCenter.playCommand, true),
-			(commandCenter.pauseCommand, true),
-			(commandCenter.togglePlayPauseCommand, true), // Magic Tap support
-			(commandCenter.changePlaybackPositionCommand, true)
-		]
+		// Remove both controls first (reset state)
+		commandCenter.nextTrackCommand.isEnabled = false
+		commandCenter.previousTrackCommand.isEnabled = false
+		commandCenter.skipForwardCommand.isEnabled = false
+		commandCenter.skipBackwardCommand.isEnabled = false
 
-		// Only add next/previous commands if showNextPrevControls is true
 		if settingShowNextPrevControls {
-			commands.append((commandCenter.nextTrackCommand, true))
-			commands.append((commandCenter.previousTrackCommand, true))
-		} else {
-			// Disable next/previous commands if showNextPrevControls is false
-			commandCenter.nextTrackCommand.isEnabled = false
-			commandCenter.previousTrackCommand.isEnabled = false
+			// Enable next/prev, skip stays disabled
+			commandCenter.nextTrackCommand.isEnabled = true
+			commandCenter.previousTrackCommand.isEnabled = true
+		} else if settingShowSkipControls {
+			// Enable skip only if next/prev are NOT shown
+			commandCenter.skipForwardCommand.isEnabled = true
+			commandCenter.skipBackwardCommand.isEnabled = true
 		}
 
-		// Enable all commands
-		commands.forEach { $0.0.isEnabled = $0.1 }
+		// Always enable play, pause, toggle, and changePlaybackPosition commands
+		commandCenter.playCommand.isEnabled = true
+		commandCenter.pauseCommand.isEnabled = true
+		commandCenter.togglePlayPauseCommand.isEnabled = true
+		commandCenter.changePlaybackPositionCommand.isEnabled = true
 
+		// Register command targets as before (disabling just hides/prevents UI, targets are safe to always register)
 		commandCenter.skipForwardCommand.addTarget { [weak self] event in
 			guard let self = self else { return .commandFailed }
-
 			let skipIntervalMs = self.settingSkipIntervalSeconds * 1000
 			self.seekForward(amount: skipIntervalMs)
 			return .success
@@ -1111,13 +1114,11 @@ class AudioPro: RCTEventEmitter {
 
 		commandCenter.skipBackwardCommand.addTarget { [weak self] event in
 			guard let self = self else { return .commandFailed }
-
 			let skipIntervalMs = self.settingSkipIntervalSeconds * 1000
 			self.seekBack(amount: skipIntervalMs)
 			return .success
 		}
 
-		// Add targets
 		commandCenter.playCommand.addTarget { [weak self] _ in
 			guard let self = self else { return .commandFailed }
 			if self.player?.rate == 0 {

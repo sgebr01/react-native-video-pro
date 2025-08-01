@@ -232,8 +232,8 @@ Both iOS and Android support lock screen and notification controls for play/paus
 ```typescript
 AudioPro.configure({
   contentType: AudioProContentType.MUSIC,
-  showNextPrevControls: false, // Hide next/previous buttons
-  showSkipControls: true,      // Show skip/seek forward/back buttons (default: true)
+  showNextPrevControls: true, // Hide next/previous buttons
+  showSkipControls: false,      // Show skip/seek forward/back buttons (default: true)
   skipInterval: 30,            // Number of seconds for skip/seek (default: 30)
 });
 ```
@@ -241,7 +241,7 @@ AudioPro.configure({
 - `showNextPrevControls` — Show next/previous buttons for playlist navigation (default: `true`).
   If enabled, lock screen and notification controls will include Next and Previous.
   If your app only plays single tracks, set to `false`.
-- `showSkipControls` — Show skip/seek forward/backward buttons (default: `true`).
+- `showSkipControls` — Show skip/seek forward/backward buttons (default: `false`).
   If enabled, lock screen and notification controls will include skip forward/backward (seek) buttons.
 - `skipInterval` — The interval (in seconds) used for skip forward/back controls.
   If not set, defaults to 30 seconds.
@@ -563,7 +563,7 @@ subscription.remove();
 
 When React Native apps go to the background, React may unmount your components or even your entire app. To ensure continuous audio playback and event handling, **always set up audio event listeners outside the React component lifecycle**.
 
-> [!NOTE]  
+> [!NOTE]
 > If you're using Expo Router, you'll need to create a custom entry point before following the steps below. See [Expo's documentation](https://docs.expo.dev/router/installation/#custom-entry-point-to-initialize-and-load) for more information.
 
 ### Example Setup Pattern
