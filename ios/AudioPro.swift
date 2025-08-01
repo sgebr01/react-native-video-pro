@@ -126,6 +126,7 @@ class AudioPro: RCTEventEmitter {
 		case .began:
 			// Interruption began (e.g., phone call, Siri, other app playing audio)
 			wasPlayingBeforeInterruption = player?.rate != 0
+			log("wasPlayingBeforeInterruption set to", wasPlayingBeforeInterruption)
 
 			if wasPlayingBeforeInterruption {
 				log("Interruption began while playing, pausing playback")
@@ -147,6 +148,9 @@ class AudioPro: RCTEventEmitter {
 			}
 
 			let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+
+			log("wasPlayingBeforeInterruption at end:", wasPlayingBeforeInterruption)
+			log("shouldResume:", options.contains(.shouldResume))
 
 			// If playback should resume and we have permission to do so
 			if wasPlayingBeforeInterruption && options.contains(.shouldResume) {
