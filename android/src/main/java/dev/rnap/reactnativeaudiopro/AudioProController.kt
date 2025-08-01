@@ -45,7 +45,7 @@ object AudioProController {
 	private var settingProgressIntervalMs: Long = 1000
 	var settingAudioContentType: Int = C.AUDIO_CONTENT_TYPE_MUSIC
 	var settingShowNextPrevControls: Boolean = true
-	var settingShowSkipControls: Boolean = true
+	var settingShowSkipControls: Boolean = false
 	var settingSkipIntervalSeconds: Double = 10.0
 
 	var headersAudio: Map<String, String>? = null
@@ -56,7 +56,7 @@ object AudioProController {
 			if (!settingDebugIncludesProgress && args.isNotEmpty() && args[0] == AudioProModule.EVENT_TYPE_PROGRESS) {
 				return
 			}
-			Log.d("[react-native-audio-pro]", "${args.joinToString(" ")}")
+			Log.d("[react-native-audio-pro]", args.joinToString(" "))
 		}
 	}
 
@@ -272,7 +272,7 @@ object AudioProController {
 
 		runOnUiThread {
 			log("Play", title, url)
-			emitState(AudioProModule.STATE_LOADING, 0L, 0L)
+			emitState(AudioProModule.STATE_LOADING, 0L, 0L, "play()")
 
 			enginerBrowser?.let {
 				// Set the new media item and prepare the player
@@ -287,7 +287,7 @@ object AudioProController {
 				if (opts.autoPlay) {
 					it.play()
 				} else {
-					emitState(AudioProModule.STATE_PAUSED, 0L, 0L)
+					emitState(AudioProModule.STATE_PAUSED, 0L, 0L, "play(autoPlay=false)")
 				}
 			} ?: Log.w("[react-native-audio-pro]", "MediaBrowser not ready")
 		}
@@ -301,7 +301,7 @@ object AudioProController {
 			enginerBrowser?.let {
 				val pos = it.currentPosition
 				val dur = it.duration.takeIf { d -> d > 0 } ?: 0L
-				emitState(AudioProModule.STATE_PAUSED, pos, dur)
+				emitState(AudioProModule.STATE_PAUSED, pos, dur, "pause()")
 			}
 		}
 	}
@@ -314,7 +314,7 @@ object AudioProController {
 			enginerBrowser?.let {
 				val pos = it.currentPosition
 				val dur = it.duration.takeIf { d -> d > 0 } ?: 0L
-				emitState(AudioProModule.STATE_PLAYING, pos, dur)
+				emitState(AudioProModule.STATE_PLAYING, pos, dur, "resume()")
 			}
 		}
 	}
@@ -336,7 +336,7 @@ object AudioProController {
 				// Use position 0 for STOPPED state as per logic.md contract
 				val dur = it.duration.takeIf { d -> d > 0 } ?: 0L
 				// Do not set currentTrack = null as STOPPED state should preserve track metadata
-				emitState(AudioProModule.STATE_STOPPED, 0L, dur)
+				emitState(AudioProModule.STATE_STOPPED, 0L, dur, "stop()")
 			}
 		}
 		stopProgressTimer()
@@ -418,7 +418,7 @@ object AudioProController {
 		}, 50)
 
 		// Emit final state
-		emitState(finalState, 0L, 0L)
+		emitState(finalState, 0L, 0L, "resetInternal($finalState)")
 	}
 
 	fun release() {
@@ -527,10 +527,10 @@ object AudioProController {
 				val dur = enginerBrowser?.duration ?: 0L
 
 				if (isPlaying) {
-					emitState(AudioProModule.STATE_PLAYING, pos, dur)
+					emitState(AudioProModule.STATE_PLAYING, pos, dur, "onIsPlayingChanged(true)")
 					startProgressTimer()
 				} else {
-					emitState(AudioProModule.STATE_PAUSED, pos, dur)
+					emitState(AudioProModule.STATE_PAUSED, pos, dur, "onIsPlayingChanged(false)")
 					stopProgressTimer()
 				}
 			}
@@ -553,9 +553,21 @@ object AudioProController {
 				when (state) {
 					Player.STATE_BUFFERING -> {
 						if (isPlayIntended) {
-							emitState(AudioProModule.STATE_LOADING, pos, dur)
+							emitState(
+								AudioProModule.STATE_LOADING,
+								pos,
+								dur,
+								"onPlaybackStateChanged(STATE_BUFFERING, playIntended=true)"
+							)
+						} else if (flowLastEmittedState == AudioProModule.STATE_PLAYING) {
+							emitState(
+								AudioProModule.STATE_PAUSED,
+								pos,
+								dur,
+								"onPlaybackStateChanged(STATE_BUFFERING, playIntended=false, wasPlaying=true)"
+							)
 						} else {
-							emitState(AudioProModule.STATE_PAUSED, pos, dur)
+							log("BUFFERING with playIntended=false, but not emitting PAUSED since last emitted state was not PLAYING")
 						}
 					}
 
@@ -568,10 +580,20 @@ object AudioProController {
 						}
 
 						if (isActuallyPlaying) {
-							emitState(AudioProModule.STATE_PLAYING, pos, dur)
+							emitState(
+								AudioProModule.STATE_PLAYING,
+								pos,
+								dur,
+								"onPlaybackStateChanged(STATE_READY, isPlaying=true)"
+							)
 							startProgressTimer()
 						} else {
-							emitState(AudioProModule.STATE_PAUSED, pos, dur)
+							emitState(
+								AudioProModule.STATE_PAUSED,
+								pos,
+								dur,
+								"onPlaybackStateChanged(STATE_READY, isPlaying=false)"
+							)
 							stopProgressTimer()
 						}
 					}
@@ -600,15 +622,30 @@ object AudioProController {
 						flowPendingSeekPosition = null
 
 						// 4. Emit STOPPED (stopped = loaded but at 0, not playing)
-						emitState(AudioProModule.STATE_STOPPED, 0L, dur)
+						emitState(
+							AudioProModule.STATE_STOPPED,
+							0L,
+							dur,
+							"onPlaybackStateChanged(STATE_ENDED)"
+						)
 
 						// 5. Emit TRACK_ENDED for JS
-						emitNotice(AudioProModule.EVENT_TYPE_TRACK_ENDED, dur, dur)
+						emitNotice(
+							AudioProModule.EVENT_TYPE_TRACK_ENDED,
+							dur,
+							dur,
+							"onPlaybackStateChanged(STATE_ENDED)"
+						)
 					}
 
 					Player.STATE_IDLE -> {
 						stopProgressTimer()
-						emitState(AudioProModule.STATE_STOPPED, 0L, 0L)
+						emitState(
+							AudioProModule.STATE_STOPPED,
+							0L,
+							0L,
+							"onPlaybackStateChanged(STATE_IDLE)"
+						)
 					}
 				}
 			}
@@ -638,7 +675,12 @@ object AudioProController {
 						putString("triggeredBy", triggeredBy)
 					}
 
-					emitEvent(AudioProModule.EVENT_TYPE_SEEK_COMPLETE, activeTrack, payload)
+					emitEvent(
+						AudioProModule.EVENT_TYPE_SEEK_COMPLETE,
+						activeTrack,
+						payload,
+						"onPositionDiscontinuity(reason=$reason, triggeredBy=$triggeredBy)"
+					)
 
 					if (triggeredBy == AudioProModule.TRIGGER_SOURCE_USER) {
 						startProgressTimer()
@@ -664,7 +706,7 @@ object AudioProController {
 
 				val message = error.message ?: "Unknown error"
 				// First, emit PLAYBACK_ERROR event with error details
-				emitError(message, 500)
+				emitError(message, 500, "onPlayerError(${error.errorCode})")
 
 				// Then use the shared resetInternal function to:
 				// 1. Clear the player state (like clear())
@@ -683,7 +725,7 @@ object AudioProController {
 			override fun run() {
 				val pos = enginerBrowser?.currentPosition ?: 0L
 				val dur = enginerBrowser?.duration ?: 0L
-				emitNotice(AudioProModule.EVENT_TYPE_PROGRESS, pos, dur)
+				emitNotice(AudioProModule.EVENT_TYPE_PROGRESS, pos, dur, "progressTimer")
 				engineProgressHandler?.postDelayed(this, settingProgressIntervalMs)
 			}
 		}
@@ -705,7 +747,13 @@ object AudioProController {
 		Handler(Looper.getMainLooper()).post(block)
 	}
 
-	private fun emitEvent(type: String, track: ReadableMap?, payload: WritableMap?) {
+	private fun emitEvent(
+		type: String,
+		track: ReadableMap?,
+		payload: WritableMap?,
+		reason: String = ""
+	) {
+		log("emitEvent", type, "reason=", reason)
 		val context = reactContext
 		if (context is ReactApplicationContext) {
 			val body = Arguments.createMap().apply {
@@ -733,10 +781,19 @@ object AudioProController {
 		}
 	}
 
-	private fun emitState(state: String, position: Long, duration: Long) {
+	private fun emitState(state: String, position: Long, duration: Long, reason: String = "") {
 		val sanitizedPosition = if (position < 0) 0L else position
 		val sanitizedDuration = if (duration < 0) 0L else duration
-		log("emitState", state, "position=", sanitizedPosition, "duration=", sanitizedDuration)
+		log(
+			"emitState",
+			state,
+			"position=",
+			sanitizedPosition,
+			"duration=",
+			sanitizedDuration,
+			"reason=",
+			reason
+		)
 		// Don't emit PAUSED if we've already emitted STOPPED (catch slow listener emit)
 		if (state == AudioProModule.STATE_PAUSED && flowLastEmittedState == AudioProModule.STATE_STOPPED) {
 			log("Ignoring PAUSED state after STOPPED")
@@ -761,7 +818,7 @@ object AudioProController {
 			putDouble("position", sanitizedPosition.toDouble())
 			putDouble("duration", sanitizedDuration.toDouble())
 		}
-		emitEvent(AudioProModule.EVENT_TYPE_STATE_CHANGED, activeTrack, payload)
+		emitEvent(AudioProModule.EVENT_TYPE_STATE_CHANGED, activeTrack, payload, reason)
 
 		// Track the last emitted state
 		flowLastEmittedState = state
@@ -769,7 +826,7 @@ object AudioProController {
 		flowLastStateEmittedTimeMs = System.currentTimeMillis()
 	}
 
-	private fun emitNotice(eventType: String, position: Long, duration: Long) {
+	private fun emitNotice(eventType: String, position: Long, duration: Long, reason: String = "") {
 		// Sanitize negative values
 		val sanitizedPosition = if (position < 0) 0L else position
 		val sanitizedDuration = if (duration < 0) 0L else duration
@@ -778,7 +835,7 @@ object AudioProController {
 			putDouble("position", sanitizedPosition.toDouble())
 			putDouble("duration", sanitizedDuration.toDouble())
 		}
-		emitEvent(eventType, activeTrack, payload)
+		emitEvent(eventType, activeTrack, payload, reason)
 	}
 
 	/**
@@ -790,20 +847,20 @@ object AudioProController {
 	 * - PLAYBACK_ERROR can be emitted with or without a corresponding state change
 	 * - Useful for soft errors (e.g., image fetch failed, headers issue, non-fatal network retry)
 	 */
-	private fun emitError(message: String, code: Int) {
+	private fun emitError(message: String, code: Int, reason: String = "") {
 		val payload = Arguments.createMap().apply {
 			putString("error", message)
 			putInt("errorCode", code)
 		}
-		emitEvent(AudioProModule.EVENT_TYPE_PLAYBACK_ERROR, activeTrack, payload)
+		emitEvent(AudioProModule.EVENT_TYPE_PLAYBACK_ERROR, activeTrack, payload, reason)
 	}
 
-	fun emitNext() {
-		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_NEXT, activeTrack, Arguments.createMap())
+	fun emitNext(reason: String = "") {
+		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_NEXT, activeTrack, Arguments.createMap(), reason)
 	}
 
-	fun emitPrev() {
-		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_PREV, activeTrack, Arguments.createMap())
+	fun emitPrev(reason: String = "") {
+		emitEvent(AudioProModule.EVENT_TYPE_REMOTE_PREV, activeTrack, Arguments.createMap(), reason)
 	}
 
 	fun setPlaybackSpeed(speed: Float) {
@@ -816,7 +873,12 @@ object AudioProController {
 			val payload = Arguments.createMap().apply {
 				putDouble("speed", speed.toDouble())
 			}
-			emitEvent(AudioProModule.EVENT_TYPE_PLAYBACK_SPEED_CHANGED, activeTrack, payload)
+			emitEvent(
+				AudioProModule.EVENT_TYPE_PLAYBACK_SPEED_CHANGED,
+				activeTrack,
+				payload,
+				"setPlaybackSpeed($speed)"
+			)
 		}
 	}
 
