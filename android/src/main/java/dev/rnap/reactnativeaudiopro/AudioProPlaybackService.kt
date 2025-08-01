@@ -90,11 +90,10 @@ open class AudioProPlaybackService : MediaLibraryService() {
 
 		val builder = NotificationCompat.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setContentTitle("Audio Pro")
-			.setContentText("Playing audio")
-			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+			.setContentTitle("Audio")
+			.setContentText("Playing...")
+			.setPriority(NotificationCompat.PRIORITY_MAX)
 			.setOngoing(true)
-			.setAutoCancel(false)
 			.also { builder -> getSessionActivityIntent()?.let { builder.setContentIntent(it) } }
 
 		startForeground(NOTIFICATION_ID, builder.build())
